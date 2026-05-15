@@ -1,0 +1,13 @@
+# Gradle and Android build artifacts
+/.gradle/
+/build/
+/app/build/
+/app/release/
+
+# Local machine configuration
+/local.properties
+
+# IDE local state
+/.idea/workspace.xml
+/.idea/deploymentTargetSelector.xml
+

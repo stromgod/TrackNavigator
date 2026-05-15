@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="gradient_start">#E8F4FC</color>
+    <color name="gradient_end">#FFF8F5</color>
+    <color name="md_theme_background">#FAFCFE</color>
+    <color name="md_theme_surface">#FFFFFF</color>
+    <color name="md_theme_primary">#1565C0</color>
+    <color name="md_theme_primary_dark">#0D47A1</color>
+    <color name="md_theme_accent">#FF8F00</color>
+    <color name="md_theme_secondary">#00838F</color>
+    <color name="card_stroke">#1A1565C0</color>
+    <color name="warning_bg">#FFF3E0</color>
+    <color name="warning_text">#E65100</color>
+    <color name="success_bg">#E8F5E9</color>
+</resources>

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingStart="16dp"
+    android:paddingTop="16dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="8dp"
+            android:text="@string/module_record"
+            android:textAppearance="@style/TextAppearance.TrackNavigator.Title" />
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.TrackNavigator.Card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="8dp"
+                    android:text="@string/record_status_idle"
+                    android:textAppearance="?attr/textAppearanceBody1"
+                    tools:text="Status" />
+
+                <TextView
+                    android:id="@+id/textCoords"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:paddingBottom="6dp"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    tools:text="Lat / Lon" />
+
+                <TextView
+                    android:id="@+id/textAccuracy"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="6dp"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    tools:text="Accuracy" />
+
+                <TextView
+                    android:id="@+id/textPointsCount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?attr/textAppearanceBody1"
+                    tools:text="Points: 0" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnStartGps"
+            style="@style/Widget.TrackNavigator.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/start_gps"
+            app:icon="@drawable/ic_btn_gps"
+            app:iconTint="?attr/colorOnPrimary" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="10dp"
+            android:text="@string/btn_desc_start_gps"
+            android:textAppearance="@style/TextAppearance.TrackNavigator.ButtonHint" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAddPoint"
+            style="@style/Widget.TrackNavigator.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:text="@string/add_control_point"
+            app:icon="@drawable/ic_btn_add_pin"
+            app:iconTint="?attr/colorOnPrimary" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="10dp"
+            android:text="@string/btn_desc_add_point"
+            android:textAppearance="@style/TextAppearance.TrackNavigator.ButtonHint" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnFinish"
+            style="@style/Widget.TrackNavigator.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:text="@string/finish_track"
+            app:icon="@drawable/ic_btn_save_gpx"
+            app:iconTint="?attr/colorOnPrimary" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="10dp"
+            android:text="@string/btn_desc_finish"
+            android:textAppearance="@style/TextAppearance.TrackNavigator.ButtonHint" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnBack"
+            style="@style/Widget.TrackNavigator.Button.Text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel_record"
+            app:icon="@drawable/ic_btn_back" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="8dp"
+            android:text="@string/btn_desc_back_record"
+            android:textAppearance="@style/TextAppearance.TrackNavigator.ButtonHint" />
+    </LinearLayout>
+</ScrollView>
