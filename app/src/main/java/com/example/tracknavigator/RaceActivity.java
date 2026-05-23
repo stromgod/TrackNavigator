@@ -13,7 +13,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
+import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,7 +42,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class RaceActivity extends AppCompatActivity implements RaceTrackingService.UiListener {
 
@@ -50,7 +53,6 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
     private List<LatLngPoint> track;
     private RaceTrackingService boundService;
     private boolean serviceBound;
-    private boolean gpsActive = false;
     private Location lastPreviewLocation;
 
     private FusedLocationProviderClient fusedClient;
@@ -82,13 +84,20 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
             boundService = null;
             serviceBound = false;
             switchToRaceLayout(false);
+            checkPermissionsAndEnableGps();
         }
     };
 
     private View layoutSetup, layoutActiveRace;
-    private TextView textSetupStatus, textDistToStart;
+    private TextView textDistToStart;
     private TextView textCheckpoint, textCoords, textAccuracy, textDeviation;
-    private MaterialButton btnPickGpx, btnStartGps, btnStartRace;
+    private TextView textMarkerStart, textMarkerMiddle, textMarkerFinish, textRaceStage;
+    private View raceProgressTrack, raceProgressFill, raceProgressBlock;
+    private ProgressBar progressGpsSetup;
+    private ImageView imgGpsCheckSetup;
+    private MaterialButton btnPickGpx, btnStartRace;
+    private int colorMarkerDefault;
+    private int colorMarkerActive;
 
     private final ActivityResultLauncher<Intent> openGpxLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -109,22 +118,31 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
         layoutSetup = findViewById(R.id.layoutSetup);
         layoutActiveRace = findViewById(R.id.layoutActiveRace);
 
-        textSetupStatus = findViewById(R.id.textSetupStatus);
         textDistToStart = findViewById(R.id.textDistToStart);
+        progressGpsSetup = findViewById(R.id.progressGpsSetup);
+        imgGpsCheckSetup = findViewById(R.id.imgGpsCheckSetup);
 
         textCheckpoint = findViewById(R.id.textCheckpoint);
         textCoords = findViewById(R.id.textCoords);
         textAccuracy = findViewById(R.id.textRaceAccuracy);
         textDeviation = findViewById(R.id.textDeviation);
 
+        raceProgressBlock = findViewById(R.id.raceProgressBlock);
+        raceProgressTrack = findViewById(R.id.raceProgressTrack);
+        raceProgressFill = findViewById(R.id.raceProgressFill);
+        textMarkerStart = findViewById(R.id.textMarkerStart);
+        textMarkerMiddle = findViewById(R.id.textMarkerMiddle);
+        textMarkerFinish = findViewById(R.id.textMarkerFinish);
+        textRaceStage = findViewById(R.id.textRaceStage);
+        colorMarkerDefault = resolveThemeColor(android.R.attr.textColorSecondary);
+        colorMarkerActive = ContextCompat.getColor(this, R.color.progress_marker_active);
+
         btnPickGpx = findViewById(R.id.btnPickGpx);
-        btnStartGps = findViewById(R.id.btnStartGps);
         btnStartRace = findViewById(R.id.btnStartRace);
         MaterialButton btnStopRace = findViewById(R.id.btnStopRace);
         MaterialButton btnBackSetup = findViewById(R.id.btnBackFromSetup);
 
         btnPickGpx.setOnClickListener(v -> pickGpx());
-        btnStartGps.setOnClickListener(v -> startGpsClicked());
         btnStartRace.setOnClickListener(v -> startRace());
         btnStopRace.setOnClickListener(v -> stopRaceUser());
         btnBackSetup.setOnClickListener(v -> finish());
@@ -134,6 +152,15 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
         } else {
             switchToRaceLayout(false);
             updateSetupButtons();
+            checkPermissionsAndEnableGps();
+        }
+    }
+
+    private void checkPermissionsAndEnableGps() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQ_PERM_LOCATION);
+        } else {
+            enableGpsUpdates();
         }
     }
 
@@ -144,7 +171,6 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
 
     private void updateSetupButtons() {
         btnPickGpx.setEnabled(true);
-        btnStartGps.setEnabled(!gpsActive);
         checkStartEligibility();
     }
 
@@ -155,12 +181,15 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
             double dist = GeoUtils.distanceMeters(new LatLngPoint(lastPreviewLocation.getLatitude(), lastPreviewLocation.getLongitude()), track.get(0));
             atStart = dist <= START_THRESHOLD_M;
         }
-        btnStartRace.setEnabled(hasTrack && gpsActive && atStart);
+        btnStartRace.setEnabled(hasTrack && atStart);
     }
 
     private void updateSetupProximityUi(Location loc) {
+        progressGpsSetup.setVisibility(View.GONE);
+        imgGpsCheckSetup.setVisibility(View.VISIBLE);
+        
         if (track == null || track.isEmpty()) {
-            textSetupStatus.setText(R.string.gps_ready_record);
+            textDistToStart.setVisibility(View.GONE);
             return;
         }
         double dist = GeoUtils.distanceMeters(new LatLngPoint(loc.getLatitude(), loc.getLongitude()), track.get(0));
@@ -168,31 +197,23 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
         textDistToStart.setText(getString(R.string.dist_to_start, dist));
 
         if (dist <= START_THRESHOLD_M) {
-            textSetupStatus.setText(getString(R.string.race_status_idle));
-            textDistToStart.setTextColor(ContextCompat.getColor(this, R.color.success_bg));
+            textDistToStart.setTextColor(ContextCompat.getColor(this, R.color.md_theme_primary));
         } else {
-            textSetupStatus.setText(getString(R.string.wait_at_start, START_THRESHOLD_M));
             textDistToStart.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark));
         }
         checkStartEligibility();
-    }
-
-    private void startGpsClicked() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQ_PERM_LOCATION);
-            return;
-        }
-        enableGpsUpdates();
     }
 
     private void enableGpsUpdates() {
         LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             Toast.makeText(this, R.string.enable_gps_toast, Toast.LENGTH_LONG).show();
+            progressGpsSetup.setVisibility(View.GONE);
+            imgGpsCheckSetup.setVisibility(View.GONE);
             return;
         }
-        gpsActive = true;
-        updateSetupButtons();
+        progressGpsSetup.setVisibility(View.VISIBLE);
+        imgGpsCheckSetup.setVisibility(View.GONE);
         startPreviewLocationUpdates();
     }
 
@@ -218,6 +239,7 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
                 track = null;
             } else {
                 Toast.makeText(this, getString(R.string.gpx_loaded_points, track.size()), Toast.LENGTH_SHORT).show();
+                checkPermissionsAndEnableGps();
                 if (lastPreviewLocation != null) updateSetupProximityUi(lastPreviewLocation);
             }
             updateSetupButtons();
@@ -252,6 +274,7 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
         textCoords.setText(state.coordsText);
         textAccuracy.setText(state.accuracyText);
         applyDeviationBackground(state.deviationBgKind);
+        updateRaceProgress(state);
 
         if (state.checkpointJustPassed) {
             Toast.makeText(this, R.string.checkpoint_passed, Toast.LENGTH_SHORT).show();
@@ -269,6 +292,58 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
         textDeviation.setBackgroundColor(ContextCompat.getColor(this, colorRes));
     }
 
+    private void updateRaceProgress(@NonNull RaceUiState state) {
+        int checkpointNumber = Math.min(state.segmentIndex + 1, state.segmentTotal + 1);
+        String stageText = stageLabel(state.routeStage);
+        textRaceStage.setText(stageText);
+        raceProgressBlock.setContentDescription(
+                getString(R.string.race_progress_desc, checkpointNumber, state.segmentTotal + 1, stageText));
+        applyMarkerHighlight(state.routeStage);
+
+        raceProgressTrack.post(() -> {
+            int trackHeight = raceProgressTrack.getHeight();
+            if (trackHeight <= 0) return;
+            int fillHeight = Math.round(trackHeight * state.progressFraction);
+            ViewGroup.LayoutParams params = raceProgressFill.getLayoutParams();
+            params.height = fillHeight;
+            raceProgressFill.setLayoutParams(params);
+        });
+    }
+
+    @NonNull
+    private String stageLabel(int routeStage) {
+        if (routeStage == RaceUiState.STAGE_MIDDLE) {
+            return getString(R.string.race_stage_middle);
+        }
+        if (routeStage == RaceUiState.STAGE_FINISH) {
+            return getString(R.string.race_stage_finish);
+        }
+        return getString(R.string.race_stage_start);
+    }
+
+    private void applyMarkerHighlight(int routeStage) {
+        textMarkerStart.setTextColor(routeStage == RaceUiState.STAGE_START
+                ? colorMarkerActive : colorMarkerDefault);
+        textMarkerStart.setTypeface(null, routeStage == RaceUiState.STAGE_START
+                ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
+
+        textMarkerMiddle.setTextColor(routeStage == RaceUiState.STAGE_MIDDLE
+                ? colorMarkerActive : colorMarkerDefault);
+        textMarkerMiddle.setTypeface(null, routeStage == RaceUiState.STAGE_MIDDLE
+                ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
+
+        textMarkerFinish.setTextColor(routeStage == RaceUiState.STAGE_FINISH
+                ? colorMarkerActive : colorMarkerDefault);
+        textMarkerFinish.setTypeface(null, routeStage == RaceUiState.STAGE_FINISH
+                ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
+    }
+
+    private int resolveThemeColor(int attr) {
+        TypedValue value = new TypedValue();
+        getTheme().resolveAttribute(attr, value, true);
+        return ContextCompat.getColor(this, value.resourceId);
+    }
+
     private void stopRaceUser() {
         RaceTrackingService.requestStop(this);
         if (serviceBound) {
@@ -276,10 +351,18 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
             serviceBound = false;
         }
         boundService = null;
-        gpsActive = false;
         switchToRaceLayout(false);
         updateSetupButtons();
         textDistToStart.setVisibility(View.GONE);
+        checkPermissionsAndEnableGps();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQ_PERM_LOCATION && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            enableGpsUpdates();
+        }
     }
 
     @Override

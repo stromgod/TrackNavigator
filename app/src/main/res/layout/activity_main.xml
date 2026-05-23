@@ -1,92 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:padding="32dp">
 
+    <!-- Guideline at 52% of the screen height -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineCenter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.52" />
+
+    <!-- Branding (Navigator Image + Title) - centered above the buttons area -->
     <LinearLayout
+        android:id="@+id/layoutBranding"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:paddingStart="20dp"
-        android:paddingTop="28dp"
-        android:paddingEnd="20dp"
-        android:paddingBottom="32dp">
+        app:layout_constraintBottom_toTopOf="@+id/guidelineCenter"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.8">
 
         <ImageView
-            android:layout_width="112dp"
-            android:layout_height="112dp"
-            android:contentDescription="@string/app_name"
+            android:id="@+id/logo"
+            android:layout_width="130dp"
+            android:layout_height="130dp"
             android:importantForAccessibility="no"
             android:src="@drawable/ic_hero_route" />
 
         <TextView
+            android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:paddingBottom="4dp"
+            android:layout_marginTop="12dp"
             android:text="@string/app_name"
-            android:textAppearance="@style/TextAppearance.TrackNavigator.Title" />
-
-        <com.google.android.material.card.MaterialCardView
-            style="@style/Widget.TrackNavigator.Card"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnRecord"
-                    style="@style/Widget.TrackNavigator.Button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/module_record"
-                    app:icon="@drawable/ic_btn_map_record"
-                    app:iconTint="?attr/colorOnPrimary" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingBottom="14dp"
-                    android:text="@string/btn_desc_record"
-                    android:textAppearance="@style/TextAppearance.TrackNavigator.ButtonHint" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnRace"
-                    style="@style/Widget.TrackNavigator.Button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/module_race"
-                    app:icon="@drawable/ic_btn_flag_race"
-                    app:iconTint="?attr/colorOnPrimary" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingBottom="14dp"
-                    android:text="@string/btn_desc_race"
-                    android:textAppearance="@style/TextAppearance.TrackNavigator.ButtonHint" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnExit"
-                    style="@style/Widget.TrackNavigator.Button.Outlined"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/exit_app"
-                    app:icon="@drawable/ic_btn_exit" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingBottom="0dp"
-                    android:text="@string/btn_desc_exit"
-                    android:textAppearance="@style/TextAppearance.TrackNavigator.ButtonHint" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+            android:textAppearance="@style/TextAppearance.TrackNavigator.Title"
+            android:textSize="30sp"
+            android:textStyle="bold" />
     </LinearLayout>
-</ScrollView>
+
+    <!-- Button Group - starts slightly below middle -->
+    <LinearLayout
+        android:id="@+id/layoutButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/guidelineCenter">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRecord"
+            style="@style/Widget.TrackNavigator.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/module_record"
+            app:icon="@drawable/ic_btn_map_record"
+            app:iconTint="?attr/colorOnPrimary" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRace"
+            style="@style/Widget.TrackNavigator.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/module_race"
+            app:icon="@drawable/ic_btn_flag_race"
+            app:iconTint="?attr/colorOnPrimary" />
+    </LinearLayout>
+
+    <!-- Exit button at the bottom -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnExit"
+        style="@style/Widget.TrackNavigator.Button.Outlined"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/exit_app"
+        app:icon="@drawable/ic_btn_exit"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

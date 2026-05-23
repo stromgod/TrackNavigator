@@ -44,16 +44,19 @@ final class RaceEvaluator {
             int segmentStartIndex,
             @Nullable Location lastFix) {
         int n = track.size();
+        int segmentTotal = Math.max(1, n - 1);
 
         if (lastFix == null) {
-            RaceUiState ui = new RaceUiState(
+            RaceUiState ui = buildUi(
                     "—",
                     ctx.getString(R.string.gps_waiting),
                     "",
                     "",
                     BG_NONE,
                     false,
-                    false);
+                    false,
+                    Math.max(0, segmentStartIndex),
+                    segmentTotal);
             return new StepResult(segmentStartIndex, false, false, ui);
         }
 
@@ -63,14 +66,17 @@ final class RaceEvaluator {
                 : ctx.getString(R.string.accuracy_label, "—");
 
         if (!lastFix.hasAccuracy() || lastFix.getAccuracy() > MAX_FIX_ACCURACY_M) {
-            RaceUiState ui = new RaceUiState(
-                    ctx.getString(R.string.checkpoint_progress, Math.max(0, segmentStartIndex), n - 1),
+            int idx = Math.max(0, segmentStartIndex);
+            RaceUiState ui = buildUi(
+                    ctx.getString(R.string.checkpoint_progress, idx, segmentTotal),
                     ctx.getString(R.string.accuracy_low_race),
                     coords,
                     acc,
                     BG_NONE,
                     false,
-                    false);
+                    false,
+                    idx,
+                    segmentTotal);
             return new StepResult(segmentStartIndex, false, false, ui);
         }
 
@@ -87,32 +93,36 @@ final class RaceEvaluator {
 
         // 2. Check for finish
         if (idx >= n - 1) {
-            RaceUiState ui = new RaceUiState(
-                    ctx.getString(R.string.checkpoint_progress, n - 1, n - 1),
+            RaceUiState ui = buildUi(
+                    ctx.getString(R.string.checkpoint_progress, segmentTotal, segmentTotal),
                     ctx.getString(R.string.race_finished),
                     coords,
                     acc,
                     BG_SUCCESS,
                     true,
-                    true);
+                    true,
+                    segmentTotal,
+                    segmentTotal);
             return new StepResult(idx, true, true, ui);
         }
 
         // 3. Normal progress
-        String checkpoint = ctx.getString(R.string.checkpoint_progress, idx, n - 1);
+        String checkpoint = ctx.getString(R.string.checkpoint_progress, idx, segmentTotal);
         LatLngPoint a = track.get(idx);
         LatLngPoint b = track.get(idx + 1);
         double crossDist = GeoUtils.distancePointToSegmentMeters(a, b, p);
 
         if (crossDist <= DEVIATION_THRESHOLD_M) {
-            RaceUiState ui = new RaceUiState(
+            RaceUiState ui = buildUi(
                     checkpoint,
                     ctx.getString(R.string.on_track),
                     coords,
                     acc,
                     BG_NONE,
                     false,
-                    checkpointPassed);
+                    checkpointPassed,
+                    idx,
+                    segmentTotal);
             return new StepResult(idx, false, checkpointPassed, ui);
         }
 
@@ -127,8 +137,50 @@ final class RaceEvaluator {
             devText = ctx.getString(R.string.on_track);
             bg = BG_NONE;
         }
-        RaceUiState ui = new RaceUiState(checkpoint, devText, coords, acc, bg, false, checkpointPassed);
+        RaceUiState ui = buildUi(checkpoint, devText, coords, acc, bg, false, checkpointPassed, idx, segmentTotal);
         return new StepResult(idx, false, checkpointPassed, ui);
+    }
+
+    private static int routeStage(int idx, int segmentTotal, boolean raceFinished) {
+        if (raceFinished || idx >= segmentTotal) {
+            return RaceUiState.STAGE_FINISH;
+        }
+        if (idx >= segmentTotal / 2) {
+            return RaceUiState.STAGE_MIDDLE;
+        }
+        return RaceUiState.STAGE_START;
+    }
+
+    private static float progressFraction(int idx, int segmentTotal, boolean raceFinished) {
+        if (raceFinished || idx >= segmentTotal) {
+            return 1f;
+        }
+        return idx / (float) segmentTotal;
+    }
+
+    @NonNull
+    private static RaceUiState buildUi(
+            @NonNull String checkpointText,
+            @NonNull String deviationText,
+            @NonNull String coordsText,
+            @NonNull String accuracyText,
+            int deviationBgKind,
+            boolean raceFinished,
+            boolean checkpointJustPassed,
+            int idx,
+            int segmentTotal) {
+        return new RaceUiState(
+                checkpointText,
+                deviationText,
+                coordsText,
+                accuracyText,
+                deviationBgKind,
+                raceFinished,
+                checkpointJustPassed,
+                idx,
+                segmentTotal,
+                progressFraction(idx, segmentTotal, raceFinished),
+                routeStage(idx, segmentTotal, raceFinished));
     }
 
     private RaceEvaluator() {
