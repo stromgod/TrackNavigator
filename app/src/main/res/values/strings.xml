@@ -52,6 +52,7 @@
     <string name="race_stage_middle">Middle</string>
     <string name="race_stage_finish">Final</string>
     <string name="race_progress_desc">Point %1$d of %2$d</string>
+    <string name="cannot_record_during_race">Recording is unavailable during race.</string>
 
     <!-- Default values for translated strings to prevent build warnings -->
     <string name="btn_desc_record">Record track</string>

@@ -25,6 +25,7 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -147,10 +148,11 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
         MaterialButton btnStopRace = findViewById(R.id.btnStopRace);
         MaterialButton btnBackSetup = findViewById(R.id.btnBackFromSetup);
 
+        if (btnStopRace != null) btnStopRace.setOnClickListener(v -> stopRaceUser());
+        if (btnBackSetup != null) btnBackSetup.setOnClickListener(v -> exitModule());
+
         btnPickGpx.setOnClickListener(v -> pickGpx());
         btnStartRace.setOnClickListener(v -> startRace());
-        btnStopRace.setOnClickListener(v -> stopRaceUser());
-        btnBackSetup.setOnClickListener(v -> exitModule());
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -318,13 +320,10 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
         } else {
             imgDirectionArrow.setColorFilter(Color.RED);
             if (state.crossTrackSign > 0) {
-                // Deviation to the left -> Arrow points left
                 imgDirectionArrow.setRotation(-90);
             } else if (state.crossTrackSign < 0) {
-                // Deviation to the right -> Arrow points right
                 imgDirectionArrow.setRotation(90);
             } else {
-                // Just in case, if bg is warning but sign is 0
                 imgDirectionArrow.setRotation(0);
             }
         }
@@ -368,14 +367,21 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
         boundService = null;
         track = null;
         
-        Toast.makeText(this, "Заезд остановлен", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Заезд окончен", Toast.LENGTH_SHORT).show();
         finish();
     }
 
     private void exitModule() {
+        // Если гонка активна, системная кнопка назад только закрывает UI
+        if (RaceTrackingService.isRaceActive()) {
+            finish();
+            return;
+        }
+
+        // Если гонка не начата, выходим полностью и останавливаем фоновый GPS
         if (isStopping) return;
         isStopping = true;
-        RaceTrackingService.requestStopRace(this);
+        RaceTrackingService.requestStopService(this);
         finish();
     }
 
