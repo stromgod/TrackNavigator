@@ -5,22 +5,46 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/md_theme_background"
-    android:padding="32dp">
+    android:padding="24dp">
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.25" />
+    <!-- Top-right exit button (Small, icon-only) -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnExit"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="0dp"
+        android:insetLeft="0dp"
+        android:insetTop="0dp"
+        android:insetRight="0dp"
+        android:insetBottom="0dp"
+        app:icon="@drawable/ic_btn_exit"
+        app:iconTint="#FFFFFF"
+        app:iconSize="32dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Voluminous White Buttons -->
+    <!-- Walking person icon (Placeholder) -->
+    <ImageView
+        android:id="@+id/imgMainHero"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_hero_route"
+        app:tint="#FFFFFF"
+        app:layout_constraintTop_toBottomOf="@id/btnExit"
+        app:layout_constraintBottom_toTopOf="@+id/layoutButtons"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Voluminous White Buttons at the bottom -->
     <LinearLayout
         android:id="@+id/layoutButtons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintTop_toBottomOf="@id/guideline">
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnRecord"
@@ -44,7 +68,7 @@
             style="@style/Widget.TrackNavigator.Button"
             android:layout_width="match_parent"
             android:layout_height="72dp"
-            android:layout_marginTop="28dp"
+            android:layout_marginTop="24dp"
             android:text="@string/module_race"
             android:textColor="@color/md_theme_onPrimary"
             android:textSize="18sp"
@@ -57,17 +81,5 @@
             android:translationZ="10dp"
             android:stateListAnimator="@null" />
     </LinearLayout>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnExit"
-        style="@style/Widget.TrackNavigator.Button.Outlined"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="@string/exit_app"
-        android:textColor="#FFFFFF"
-        app:strokeColor="#FFFFFF"
-        app:icon="@drawable/ic_btn_exit"
-        app:iconTint="#FFFFFF"
-        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
