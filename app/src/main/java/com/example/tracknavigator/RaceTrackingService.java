@@ -38,12 +38,14 @@ import java.util.List;
 
 /**
  * Foreground service for tracking race progress.
- * Sends notifications on checkpoint arrival.
+ * Starts GPS search early and keeps it running seamlessly.
  */
 public class RaceTrackingService extends Service {
 
+    public static final String ACTION_PREPARE = "com.example.tracknavigator.action.RACE_PREPARE";
     public static final String ACTION_START = "com.example.tracknavigator.action.RACE_START";
-    public static final String ACTION_STOP = "com.example.tracknavigator.action.RACE_STOP";
+    public static final String ACTION_STOP_RACE = "com.example.tracknavigator.action.RACE_STOP_RACE";
+    public static final String ACTION_STOP_SERVICE = "com.example.tracknavigator.action.RACE_STOP_SERVICE";
     public static final String EXTRA_TRACK = "extra_track";
 
     private static final String TAG = "RaceTrackingService";
@@ -54,19 +56,31 @@ public class RaceTrackingService extends Service {
     private static final long DEVIATION_SOUND_REPEAT_MS = 5000L;
 
     private static volatile boolean sRunning;
+    private static volatile boolean sRaceActive;
 
     public static boolean isRunning() {
         return sRunning;
     }
 
-    public static void requestStop(@NonNull Context ctx) {
+    public static boolean isRaceActive() {
+        return sRaceActive;
+    }
+
+    public static void requestStopRace(@NonNull Context ctx) {
         Intent i = new Intent(ctx, RaceTrackingService.class);
-        i.setAction(ACTION_STOP);
+        i.setAction(ACTION_STOP_RACE);
+        ctx.startService(i);
+    }
+
+    public static void requestStopService(@NonNull Context ctx) {
+        Intent i = new Intent(ctx, RaceTrackingService.class);
+        i.setAction(ACTION_STOP_SERVICE);
         ctx.startService(i);
     }
 
     public interface UiListener {
         void onRaceUiState(@NonNull RaceUiState state);
+        void onLocationUpdate(@NonNull Location location);
     }
 
     public class LocalBinder extends android.os.Binder {
@@ -84,6 +98,7 @@ public class RaceTrackingService extends Service {
         public void onLocationResult(@NonNull LocationResult locationResult) {
             for (Location location : locationResult.getLocations()) {
                 lastFix = location;
+                if (uiListener != null) uiListener.onLocationUpdate(location);
             }
         }
     };
@@ -91,16 +106,15 @@ public class RaceTrackingService extends Service {
     private final Runnable tickRunnable = new Runnable() {
         @Override
         public void run() {
-            if (!raceActive) return;
+            if (!sRaceActive) return;
             runEvaluationTick();
-            if (raceActive) mainHandler.postDelayed(this, TICK_MS);
+            if (sRaceActive) mainHandler.postDelayed(this, TICK_MS);
         }
     };
 
     @Nullable private UiListener uiListener;
     @Nullable private List<LatLngPoint> track;
     private int segmentStartIndex;
-    private boolean raceActive;
     @Nullable private Location lastFix;
     @Nullable private RaceUiState lastUiState;
 
@@ -113,8 +127,9 @@ public class RaceTrackingService extends Service {
 
     public void setUiListener(@Nullable UiListener listener) {
         uiListener = listener;
-        if (listener != null && lastUiState != null) {
-            listener.onRaceUiState(lastUiState);
+        if (listener != null) {
+            if (lastUiState != null) listener.onRaceUiState(lastUiState);
+            if (lastFix != null) listener.onLocationUpdate(lastFix);
         }
     }
 
@@ -123,21 +138,37 @@ public class RaceTrackingService extends Service {
         super.onCreate();
         fusedClient = LocationServices.getFusedLocationProviderClient(this);
         ensureChannel();
+        sRunning = true;
     }
 
     @Override
     public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
-        if (intent == null) { stopSelf(); return START_NOT_STICKY; }
-        if (ACTION_STOP.equals(intent.getAction())) {
+        if (intent == null) return START_STICKY;
+        String action = intent.getAction();
+        
+        if (ACTION_STOP_SERVICE.equals(action)) {
             shutdownFromStopAction();
             return START_NOT_STICKY;
         }
-        if (ACTION_START.equals(intent.getAction())) {
+
+        if (ACTION_STOP_RACE.equals(action)) {
+            onRaceCompleted();
+            return START_STICKY;
+        }
+        
+        if (ACTION_PREPARE.equals(action)) {
+            startForegroundServiceMode();
+            ensureLocationUpdatesRunning();
+            return START_STICKY;
+        }
+        
+        if (ACTION_START.equals(action)) {
+            sRaceActive = true;
             List<LatLngPoint> loaded = readTrackExtra(intent);
             if (loaded != null) beginSession(loaded);
-            else stopSelf();
+            else { sRaceActive = false; startForegroundServiceMode(); }
         }
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
     @Nullable
@@ -148,6 +179,7 @@ public class RaceTrackingService extends Service {
     public void onDestroy() {
         tearDownLocationAndTicker();
         sRunning = false;
+        sRaceActive = false;
         super.onDestroy();
     }
 
@@ -155,11 +187,13 @@ public class RaceTrackingService extends Service {
         tearDownLocationAndTicker();
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE);
         sRunning = false;
+        sRaceActive = false;
         stopSelf();
     }
 
     private void tearDownLocationAndTicker() {
-        raceActive = false;
+        sRaceActive = false;
+        locationUpdatesRunning = false;
         mainHandler.removeCallbacks(tickRunnable);
         try { fusedClient.removeLocationUpdates(locationCallback); } catch (Exception ignored) {}
         releaseSoundPool();
@@ -173,21 +207,36 @@ public class RaceTrackingService extends Service {
         } catch (Exception e) { return null; }
     }
 
+    private boolean locationUpdatesRunning;
+    private void ensureLocationUpdatesRunning() {
+        if (locationUpdatesRunning) return;
+        LocationRequest request = new LocationRequest.Builder(GPS_MIN_INTERVAL_MS)
+                .setPriority(Priority.PRIORITY_HIGH_ACCURACY).build();
+        try {
+            fusedClient.requestLocationUpdates(request, locationCallback, Looper.getMainLooper());
+            locationUpdatesRunning = true;
+        } catch (SecurityException ignored) {}
+    }
+
+    private void startForegroundServiceMode() {
+        startForeground(NOTIF_ID, buildNotification(lastUiState), 
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION : 0);
+    }
+
     private void beginSession(@NonNull List<LatLngPoint> points) {
-        tearDownLocationAndTicker();
+        mainHandler.removeCallbacks(tickRunnable);
+        lastUiState = null;
         initSoundPool();
         track = points;
         segmentStartIndex = 0;
-        raceActive = true;
-        sRunning = true;
+        sRaceActive = true;
 
-        startForeground(NOTIF_ID, buildNotification(null), 
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION : 0);
-
-        LocationRequest request = new LocationRequest.Builder(GPS_MIN_INTERVAL_MS)
-                .setPriority(Priority.PRIORITY_HIGH_ACCURACY).build();
-        try { fusedClient.requestLocationUpdates(request, locationCallback, Looper.getMainLooper()); } catch (SecurityException ignored) {}
-        mainHandler.post(tickRunnable);
+        startForegroundServiceMode();
+        ensureLocationUpdatesRunning();
+        
+        runEvaluationTick();
+        
+        mainHandler.postDelayed(tickRunnable, TICK_MS);
     }
 
     private void runEvaluationTick() {
@@ -197,8 +246,6 @@ public class RaceTrackingService extends Service {
         lastUiState = step.ui;
         
         maybePlayDeviationWarning(step.ui);
-        
-        // Update notification. If checkpoint passed, it will show the new number.
         updateNotification(step.ui, step.checkpointJustPassed);
 
         if (uiListener != null) uiListener.onRaceUiState(step.ui);
@@ -206,22 +253,24 @@ public class RaceTrackingService extends Service {
     }
 
     private void onRaceCompleted() {
-        raceActive = false;
+        sRaceActive = false;
+        track = null;
         mainHandler.removeCallbacks(tickRunnable);
-        sRunning = false;
-        stopSelf();
+        startForegroundServiceMode(); // Switch to "waiting" notification
     }
 
     private void ensureChannel() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
-        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, getString(R.string.race_notif_channel_name), NotificationManager.IMPORTANCE_DEFAULT);
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, getString(R.string.race_notif_channel_name), NotificationManager.IMPORTANCE_LOW);
         getSystemService(NotificationManager.class).createNotificationChannel(channel);
     }
 
     @NonNull
     private Notification buildNotification(@Nullable RaceUiState state) {
-        String content = (state != null) ? state.checkpointText + " - " + state.deviationText : getString(R.string.gps_waiting);
-        PendingIntent tap = PendingIntent.getActivity(this, 0, new Intent(this, RaceActivity.class), PendingIntent.FLAG_IMMUTABLE);
+        String content = (state != null && sRaceActive) ? state.checkpointText + " - " + state.deviationText : getString(R.string.gps_waiting);
+        Intent intent = new Intent(this, RaceActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent tap = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
         return new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle(getString(R.string.race_notif_title))
@@ -234,13 +283,16 @@ public class RaceTrackingService extends Service {
     }
 
     private void updateNotification(@NonNull RaceUiState state, boolean alert) {
+        if (!sRaceActive) return;
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        Intent intent = new Intent(this, RaceActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle(getString(R.string.race_notif_title))
                 .setContentText(state.checkpointText + " | " + state.deviationText)
                 .setSmallIcon(android.R.drawable.ic_menu_mylocation)
-                .setOnlyAlertOnce(!alert) // Alert if checkpoint passed
-                .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(this, RaceActivity.class), PendingIntent.FLAG_IMMUTABLE));
+                .setOnlyAlertOnce(!alert)
+                .setContentIntent(PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE));
         
         if (alert) {
             builder.setSubText(getString(R.string.checkpoint_passed));
@@ -262,11 +314,12 @@ public class RaceTrackingService extends Service {
     }
 
     private void initSoundPool() {
+        if (soundPool != null) return;
         soundPool = new SoundPool.Builder().setMaxStreams(1).setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build()).build();
         soundPool.setOnLoadCompleteListener((p, s, st) -> soundLoaded = (st == 0));
         int resId = getResources().getIdentifier("deviation_warning", "raw", getPackageName());
         if (resId != 0) warningSoundId = soundPool.load(this, resId, 1);
     }
 
-    private void releaseSoundPool() { if (soundPool != null) { soundPool.release(); soundPool = null; } }
+    private void releaseSoundPool() { if (soundPool != null) { soundPool.release(); soundPool = null; soundLoaded = false; } }
 }

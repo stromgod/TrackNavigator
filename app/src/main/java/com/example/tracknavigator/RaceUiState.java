@@ -28,6 +28,8 @@ public final class RaceUiState {
     public final float progressFraction;
     /** {@link #STAGE_START}, {@link #STAGE_MIDDLE}, or {@link #STAGE_FINISH}. */
     public final int routeStage;
+    /** Positive = Left deviation, Negative = Right deviation, 0 = On Track. */
+    public final double crossTrackSign;
 
     public RaceUiState(
             @NonNull String checkpointText,
@@ -40,7 +42,8 @@ public final class RaceUiState {
             int segmentIndex,
             int segmentTotal,
             float progressFraction,
-            int routeStage) {
+            int routeStage,
+            double crossTrackSign) {
         this.checkpointText = checkpointText;
         this.deviationText = deviationText;
         this.coordsText = coordsText;
@@ -52,5 +55,6 @@ public final class RaceUiState {
         this.segmentTotal = segmentTotal;
         this.progressFraction = progressFraction;
         this.routeStage = routeStage;
+        this.crossTrackSign = crossTrackSign;
     }
 }

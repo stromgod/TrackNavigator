@@ -56,7 +56,8 @@ final class RaceEvaluator {
                     false,
                     false,
                     Math.max(0, segmentStartIndex),
-                    segmentTotal);
+                    segmentTotal,
+                    0);
             return new StepResult(segmentStartIndex, false, false, ui);
         }
 
@@ -76,7 +77,8 @@ final class RaceEvaluator {
                     false,
                     false,
                     idx,
-                    segmentTotal);
+                    segmentTotal,
+                    0);
             return new StepResult(segmentStartIndex, false, false, ui);
         }
 
@@ -102,7 +104,8 @@ final class RaceEvaluator {
                     true,
                     true,
                     segmentTotal,
-                    segmentTotal);
+                    segmentTotal,
+                    0);
             return new StepResult(idx, true, true, ui);
         }
 
@@ -111,6 +114,7 @@ final class RaceEvaluator {
         LatLngPoint a = track.get(idx);
         LatLngPoint b = track.get(idx + 1);
         double crossDist = GeoUtils.distancePointToSegmentMeters(a, b, p);
+        double crossSign = GeoUtils.crossTrackSign(a, b, p);
 
         if (crossDist <= DEVIATION_THRESHOLD_M) {
             RaceUiState ui = buildUi(
@@ -122,22 +126,22 @@ final class RaceEvaluator {
                     false,
                     checkpointPassed,
                     idx,
-                    segmentTotal);
+                    segmentTotal,
+                    0);
             return new StepResult(idx, false, checkpointPassed, ui);
         }
 
-        double cross = GeoUtils.crossTrackSign(a, b, p);
         int bg = BG_WARNING;
         String devText;
-        if (cross > 0) {
+        if (crossSign > 0) {
             devText = ctx.getString(R.string.deviation_left);
-        } else if (cross < 0) {
+        } else if (crossSign < 0) {
             devText = ctx.getString(R.string.deviation_right);
         } else {
             devText = ctx.getString(R.string.on_track);
             bg = BG_NONE;
         }
-        RaceUiState ui = buildUi(checkpoint, devText, coords, acc, bg, false, checkpointPassed, idx, segmentTotal);
+        RaceUiState ui = buildUi(checkpoint, devText, coords, acc, bg, false, checkpointPassed, idx, segmentTotal, crossSign);
         return new StepResult(idx, false, checkpointPassed, ui);
     }
 
@@ -168,7 +172,8 @@ final class RaceEvaluator {
             boolean raceFinished,
             boolean checkpointJustPassed,
             int idx,
-            int segmentTotal) {
+            int segmentTotal,
+            double crossTrackSign) {
         return new RaceUiState(
                 checkpointText,
                 deviationText,
@@ -180,7 +185,8 @@ final class RaceEvaluator {
                 idx,
                 segmentTotal,
                 progressFraction(idx, segmentTotal, raceFinished),
-                routeStage(idx, segmentTotal, raceFinished));
+                routeStage(idx, segmentTotal, raceFinished),
+                crossTrackSign);
     }
 
     private RaceEvaluator() {

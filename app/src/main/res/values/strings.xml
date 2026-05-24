@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Track Navigator</string>
-    <string name="module_record">Record track</string>
-    <string name="module_race">Race on track</string>
+    <string name="module_record">Record</string>
+    <string name="module_race">Race</string>
     <string name="exit_app">Exit</string>
     <string name="start_gps">Start GPS</string>
     <string name="add_control_point">Add point</string>
@@ -19,15 +19,15 @@
     <string name="enable_gps_toast">Please enable GPS in system settings.</string>
     <string name="accuracy_low_race">Low accuracy</string>
     <string name="accuracy_too_poor">Accuracy too poor</string>
-    <string name="need_two_points">Need at least 2 points</string>
-    <string name="gpx_saved">Track saved!</string>
+    <string name="need_two_points">Need 2+ points</string>
+    <string name="gpx_saved">Saved!</string>
     <string name="save_name_title">Save track</string>
-    <string name="save_name_message">Enter file name:</string>
+    <string name="save_name_message">Enter name:</string>
     <string name="save_action">Save</string>
     <string name="save_failed">Save failed</string>
     <string name="save_failed_with_reason">Error: %1$s</string>
-    <string name="pick_gpx">Choose track file</string>
-    <string name="gpx_file_unreadable">File unreadable.</string>
+    <string name="pick_gpx">Choose file</string>
+    <string name="gpx_file_unreadable">Unreadable.</string>
     <string name="gpx_invalid_file">Invalid track.</string>
     <string name="gpx_loaded_points">Loaded %1$d points</string>
     <string name="gpx_parse_error">Error: %1$s</string>
@@ -39,17 +39,31 @@
     <string name="on_track">On track</string>
     <string name="race_finished">FINISH!</string>
     <string name="permission_rationale">Location access required.</string>
-    <string name="race_notif_channel_name">Active race</string>
-    <string name="race_notif_title">Race in progress</string>
-    <string name="wait_at_start">Go to start line</string>
-    <string name="dist_to_start">Start in: %1$.1f m</string>
-    <string name="checkpoint_passed">Point passed!</string>
+    <string name="race_notif_channel_name">Race Active</string>
+    <string name="race_notif_title">Race</string>
+    <string name="wait_at_start">Go to start</string>
+    <string name="dist_to_start">Start: %1$.1f m</string>
+    <string name="checkpoint_passed">Passed!</string>
     <string name="race_progress_title">Progress</string>
     <string name="race_marker_start">Start</string>
     <string name="race_marker_middle">Mid</string>
     <string name="race_marker_finish">Finish</string>
-    <string name="race_stage_start">Beginning</string>
+    <string name="race_stage_start">Start</string>
     <string name="race_stage_middle">Middle</string>
-    <string name="race_stage_finish">Final stretch</string>
+    <string name="race_stage_finish">Final</string>
     <string name="race_progress_desc">Point %1$d of %2$d</string>
+
+    <!-- Default values for translated strings to prevent build warnings -->
+    <string name="btn_desc_record">Record track</string>
+    <string name="btn_desc_race">Race on track</string>
+    <string name="btn_desc_exit">Exit app</string>
+    <string name="btn_desc_start_gps">Start GPS</string>
+    <string name="btn_desc_add_point">Add control point</string>
+    <string name="btn_desc_finish">Save track</string>
+    <string name="btn_desc_back_record">Go back</string>
+    <string name="btn_desc_pick_gpx">Pick GPX</string>
+    <string name="btn_desc_start_race">Start race session</string>
+    <string name="btn_desc_stop_race">Stop race</string>
+    <string name="btn_desc_back_race">Go back</string>
+    <string name="race_notif_channel_desc">Location tracking for race</string>
 </resources>

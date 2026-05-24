@@ -13,20 +13,23 @@
         android:orientation="vertical"
         android:padding="24dp">
 
+        <!-- Logo at the top -->
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="160dp"
-            android:layout_marginBottom="24dp"
+            android:layout_marginBottom="32dp"
             android:importantForAccessibility="no"
             android:scaleType="centerInside"
             android:src="@drawable/ic_hero_route"
-            app:tint="?attr/colorPrimary" />
+            app:tint="#FFFFFF" />
 
         <com.google.android.material.card.MaterialCardView
             style="@style/Widget.TrackNavigator.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="32dp"
+            app:cardBackgroundColor="@color/md_theme_surface"
+            app:strokeColor="@color/card_stroke"
             app:cardElevation="8dp"
             app:cardCornerRadius="20dp">
 
@@ -36,7 +39,7 @@
                 android:orientation="vertical"
                 android:padding="20dp">
 
-                <!-- GPS Status Indicator (Centered, no label) -->
+                <!-- GPS Indicator (No text label as requested) -->
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
@@ -48,6 +51,7 @@
                         android:layout_height="32dp"
                         android:layout_gravity="center"
                         android:indeterminate="true"
+                        android:indeterminateTint="#FFFFFF"
                         android:visibility="visible" />
 
                     <ImageView
@@ -56,6 +60,7 @@
                         android:layout_height="40dp"
                         android:layout_gravity="center"
                         android:src="@drawable/ic_check_green"
+                        app:tint="#FFFFFF"
                         android:visibility="gone" />
                 </FrameLayout>
 
@@ -66,6 +71,7 @@
                     android:fontFamily="monospace"
                     android:paddingBottom="6dp"
                     android:gravity="center"
+                    android:textColor="#FFFFFF"
                     android:textAppearance="?attr/textAppearanceBody2"
                     tools:text="Lat: 55.1234 Lon: 37.5678" />
 
@@ -75,13 +81,14 @@
                     android:layout_height="wrap_content"
                     android:paddingBottom="16dp"
                     android:gravity="center"
+                    android:textColor="#E0E0E0"
                     android:textAppearance="?attr/textAppearanceBody2"
                     tools:text="Accuracy: 3.2m" />
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="2dp"
-                    android:background="#12000000"
+                    android:background="#40FFFFFF"
                     android:layout_marginBottom="16dp" />
 
                 <TextView
@@ -91,6 +98,7 @@
                     android:textAppearance="?attr/textAppearanceHeadline6"
                     android:textStyle="bold"
                     android:gravity="center"
+                    android:textColor="#FFFFFF"
                     tools:text="Points: 12" />
 
                 <TextView
@@ -99,13 +107,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:textAppearance="?attr/textAppearanceSubtitle2"
-                    android:textColor="?attr/colorPrimary"
+                    android:textColor="#E0E0E0"
                     android:gravity="center"
                     android:alpha="0.8"
                     tools:text="Distance: 1.45 km" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Pleasant White Buttons -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAddPoint"
             style="@style/Widget.TrackNavigator.Button"
@@ -114,8 +123,10 @@
             android:layout_marginBottom="20dp"
             android:enabled="false"
             android:text="@string/add_control_point"
+            android:textColor="@color/md_theme_onPrimary"
+            app:backgroundTint="#FFFFFF"
             app:icon="@drawable/ic_btn_add_pin"
-            app:iconTint="?attr/colorOnPrimary"
+            app:iconTint="@color/md_theme_onPrimary"
             android:elevation="12dp"
             android:stateListAnimator="@null"
             android:translationZ="6dp" />
@@ -128,8 +139,10 @@
             android:layout_marginBottom="20dp"
             android:enabled="false"
             android:text="@string/finish_track"
+            android:textColor="@color/md_theme_onPrimary"
+            app:backgroundTint="#FFFFFF"
             app:icon="@drawable/ic_btn_save_gpx"
-            app:iconTint="?attr/colorOnPrimary"
+            app:iconTint="@color/md_theme_onPrimary"
             android:elevation="12dp"
             android:stateListAnimator="@null"
             android:translationZ="6dp" />
@@ -145,6 +158,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/cancel_record"
-            app:icon="@drawable/ic_btn_back" />
+            android:textColor="#FFFFFF"
+            app:icon="@drawable/ic_btn_back"
+            app:iconTint="#FFFFFF" />
     </LinearLayout>
 </ScrollView>

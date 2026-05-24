@@ -15,6 +15,7 @@
         android:padding="24dp"
         android:visibility="visible">
 
+        <!-- Logo at the top -->
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="160dp"
@@ -22,13 +23,15 @@
             android:importantForAccessibility="no"
             android:scaleType="centerInside"
             android:src="@drawable/ic_hero_route"
-            app:tint="?attr/colorPrimary" />
+            app:tint="#FFFFFF" />
 
         <com.google.android.material.card.MaterialCardView
             style="@style/Widget.TrackNavigator.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="32dp"
+            app:cardBackgroundColor="@color/md_theme_surface"
+            app:strokeColor="@color/card_stroke"
             app:cardElevation="8dp"
             app:cardCornerRadius="20dp">
 
@@ -38,7 +41,6 @@
                 android:orientation="vertical"
                 android:padding="20dp">
 
-                <!-- GPS Status Indicator (Centered) -->
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
@@ -50,6 +52,7 @@
                         android:layout_height="32dp"
                         android:layout_gravity="center"
                         android:indeterminate="true"
+                        android:indeterminateTint="#FFFFFF"
                         android:visibility="visible" />
 
                     <ImageView
@@ -66,7 +69,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="?attr/textAppearanceSubtitle2"
-                    android:textColor="?attr/colorPrimary"
+                    android:textColor="#FFFFFF"
                     android:gravity="center"
                     android:visibility="gone"
                     tools:text="Distance to start: 150m"
@@ -81,9 +84,12 @@
             android:layout_height="64dp"
             android:layout_marginBottom="20dp"
             android:text="@string/pick_gpx"
+            android:textColor="@color/md_theme_onPrimary"
+            android:textStyle="bold"
+            app:backgroundTint="#FFFFFF"
             app:icon="@drawable/ic_btn_folder"
+            app:iconTint="@color/md_theme_onPrimary"
             android:elevation="12dp"
-            android:stateListAnimator="@null"
             android:translationZ="6dp" />
 
         <com.google.android.material.button.MaterialButton
@@ -93,9 +99,12 @@
             android:layout_height="64dp"
             android:enabled="false"
             android:text="@string/start_race"
+            android:textColor="@color/md_theme_onPrimary"
+            android:textStyle="bold"
+            app:backgroundTint="#FFFFFF"
             app:icon="@drawable/ic_btn_play"
+            app:iconTint="@color/md_theme_onPrimary"
             android:elevation="12dp"
-            android:stateListAnimator="@null"
             android:translationZ="6dp" />
 
         <View
@@ -109,7 +118,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/cancel_record"
-            app:icon="@drawable/ic_btn_back" />
+            android:textColor="#FFFFFF"
+            app:icon="@drawable/ic_btn_back"
+            app:iconTint="#FFFFFF" />
     </LinearLayout>
 
     <!-- PART 2: ACTIVE RACE UI -->
@@ -122,75 +133,75 @@
         android:visibility="gone"
         tools:visibility="visible">
 
+        <!-- Header -->
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_marginBottom="16dp"
+            android:src="@drawable/ic_hero_route"
+            app:tint="#FFFFFF" />
+
         <com.google.android.material.card.MaterialCardView
             style="@style/Widget.TrackNavigator.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
+            app:cardBackgroundColor="@color/md_theme_surface"
+            app:strokeColor="@color/card_stroke"
             app:cardElevation="6dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="24dp"
+                android:gravity="center">
+
+                <!-- Direction Arrow -->
+                <ImageView
+                    android:id="@+id/imgDirectionArrow"
+                    android:layout_width="160dp"
+                    android:layout_height="160dp"
+                    android:src="@drawable/ic_direction_arrow"
+                    android:scaleType="centerInside"
+                    android:importantForAccessibility="no"
+                    tools:tint="#4CAF50" />
 
                 <TextView
                     android:id="@+id/textCheckpoint"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
                     android:textAppearance="?attr/textAppearanceHeadline5"
-                    android:textColor="?attr/colorPrimary"
+                    android:textColor="#FFFFFF"
                     android:textStyle="bold"
-                    android:gravity="center"
-                    tools:text="Checkpoint 3 / 10" />
+                    tools:text="Checkpoint 1/5" />
 
                 <TextView
                     android:id="@+id/textDeviation"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:minHeight="72dp"
-                    android:gravity="center"
-                    android:padding="12dp"
-                    android:textAppearance="?attr/textAppearanceHeadline6"
-                    android:background="@android:color/transparent"
-                    tools:background="#40FF0000"
-                    tools:text="On Track" />
-
-                <TextView
-                    android:id="@+id/textCoords"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:fontFamily="monospace"
-                    android:gravity="center"
-                    android:textAppearance="?attr/textAppearanceBody2"
-                    tools:text="Lat / Lon" />
-
-                <TextView
-                    android:id="@+id/textRaceAccuracy"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingTop="4dp"
-                    android:gravity="center"
-                    android:textAppearance="?attr/textAppearanceBody2"
-                    tools:text="Accuracy: 3.2 m" />
+                    android:layout_marginTop="8dp"
+                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                    android:textColor="#FFCDD2"
+                    tools:text="Deviation: 12m L" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Progress Card -->
         <com.google.android.material.card.MaterialCardView
             style="@style/Widget.TrackNavigator.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
+            app:cardBackgroundColor="@color/md_theme_surface"
+            app:strokeColor="@color/card_stroke"
             app:cardElevation="6dp">
 
             <LinearLayout
                 android:id="@+id/raceProgressBlock"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:importantForAccessibility="yes"
                 android:orientation="vertical"
                 android:padding="16dp">
 
@@ -199,13 +210,13 @@
                     android:layout_height="wrap_content"
                     android:paddingBottom="12dp"
                     android:text="@string/race_progress_title"
+                    android:textColor="#FFFFFF"
                     android:textAppearance="?attr/textAppearanceSubtitle1"
                     android:textStyle="bold" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="180dp"
-                    android:importantForAccessibility="no"
+                    android:layout_height="140dp"
                     android:orientation="horizontal">
 
                     <FrameLayout
@@ -220,8 +231,8 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="top|start"
                             android:text="@string/race_marker_start"
-                            android:textAppearance="?attr/textAppearanceBody2"
-                            android:textStyle="bold" />
+                            android:textColor="#FFFFFF"
+                            android:textAppearance="?attr/textAppearanceBody2" />
 
                         <TextView
                             android:id="@+id/textMarkerMiddle"
@@ -229,6 +240,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical|start"
                             android:text="@string/race_marker_middle"
+                            android:textColor="#E0E0E0"
                             android:textAppearance="?attr/textAppearanceBody2" />
 
                         <TextView
@@ -237,43 +249,28 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="bottom|start"
                             android:text="@string/race_marker_finish"
+                            android:textColor="#E0E0E0"
                             android:textAppearance="?attr/textAppearanceBody2" />
                     </FrameLayout>
 
                     <FrameLayout
                         android:id="@+id/raceProgressTrack"
                         android:layout_width="32dp"
-                        android:layout_height="match_parent"
-                        android:contentDescription="@string/race_progress_title">
+                        android:layout_height="match_parent">
 
                         <View
                             android:id="@+id/raceProgressBg"
                             android:layout_width="16dp"
                             android:layout_height="match_parent"
                             android:layout_gravity="center_horizontal"
-                            android:background="@drawable/bg_race_progress_track"
-                            android:importantForAccessibility="no" />
+                            android:background="@drawable/bg_race_progress_track" />
 
                         <View
                             android:id="@+id/raceProgressFill"
                             android:layout_width="16dp"
                             android:layout_height="0dp"
                             android:layout_gravity="top|center_horizontal"
-                            android:background="@drawable/bg_race_progress_fill"
-                            android:importantForAccessibility="no" />
-
-                        <LinearLayout
-                            android:layout_width="24dp"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center_horizontal"
-                            android:importantForAccessibility="no"
-                            android:orientation="vertical">
-                            <View android:layout_width="24dp" android:layout_height="4dp" android:background="@drawable/bg_race_progress_tick" />
-                            <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1" />
-                            <View android:layout_width="24dp" android:layout_height="4dp" android:background="@drawable/bg_race_progress_tick" />
-                            <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1" />
-                            <View android:layout_width="24dp" android:layout_height="4dp" android:background="@drawable/bg_race_progress_tick" />
-                        </LinearLayout>
+                            android:background="@drawable/bg_race_progress_fill" />
                     </FrameLayout>
                 </LinearLayout>
 
@@ -283,8 +280,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:textAppearance="?attr/textAppearanceBody2"
-                    android:textColor="?attr/colorPrimary"
-                    tools:text="First part of the track" />
+                    android:textColor="#FFFFFF"
+                    tools:text="Race in progress..." />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -295,10 +292,15 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnStopRace"
-            style="@style/Widget.TrackNavigator.Button.Outlined"
+            style="@style/Widget.TrackNavigator.Button"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:text="@string/stop_race"
-            app:icon="@drawable/ic_btn_stop" />
+            android:textColor="@color/md_theme_onPrimary"
+            android:textStyle="bold"
+            app:backgroundTint="#FFFFFF"
+            app:icon="@drawable/ic_btn_stop"
+            app:iconTint="@color/md_theme_onPrimary"
+            android:elevation="8dp" />
     </LinearLayout>
 </FrameLayout>
