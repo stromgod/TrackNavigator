@@ -15,7 +15,6 @@
         android:padding="24dp"
         android:visibility="visible">
 
-        <!-- Logo at the top -->
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="160dp"
@@ -133,13 +132,29 @@
         android:visibility="gone"
         tools:visibility="visible">
 
-        <!-- Header -->
-        <ImageView
+        <!-- Top bar with small stop/exit button -->
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_marginBottom="16dp"
-            android:src="@drawable/ic_hero_route"
-            app:tint="#FFFFFF" />
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnStopRace"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="end"
+                android:padding="0dp"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                app:icon="@drawable/ic_btn_exit"
+                app:iconTint="#FFFFFF"
+                app:iconSize="32dp"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp" />
+        </FrameLayout>
 
         <com.google.android.material.card.MaterialCardView
             style="@style/Widget.TrackNavigator.Card"
@@ -157,25 +172,14 @@
                 android:padding="24dp"
                 android:gravity="center">
 
-                <!-- Direction Arrow -->
                 <ImageView
                     android:id="@+id/imgDirectionArrow"
-                    android:layout_width="160dp"
-                    android:layout_height="160dp"
+                    android:layout_width="200dp"
+                    android:layout_height="280dp"
                     android:src="@drawable/ic_direction_arrow"
-                    android:scaleType="centerInside"
+                    android:scaleType="fitCenter"
                     android:importantForAccessibility="no"
                     tools:tint="#4CAF50" />
-
-                <TextView
-                    android:id="@+id/textCheckpoint"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:textAppearance="?attr/textAppearanceHeadline5"
-                    android:textColor="#FFFFFF"
-                    android:textStyle="bold"
-                    tools:text="Checkpoint 1/5" />
 
                 <TextView
                     android:id="@+id/textDeviation"
@@ -188,7 +192,6 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Progress Card -->
         <com.google.android.material.card.MaterialCardView
             style="@style/Widget.TrackNavigator.Card"
             android:layout_width="match_parent"
@@ -216,91 +219,54 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="140dp"
-                    android:orientation="horizontal">
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
                     <FrameLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:paddingEnd="12dp">
+                        android:id="@+id/raceProgressTrack"
+                        android:layout_width="match_parent"
+                        android:layout_height="32dp">
+
+                        <View
+                            android:id="@+id/raceProgressBg"
+                            android:layout_width="match_parent"
+                            android:layout_height="16dp"
+                            android:layout_gravity="center_vertical"
+                            android:background="@drawable/bg_race_progress_track" />
+
+                        <View
+                            android:id="@+id/raceProgressFill"
+                            android:layout_width="0dp"
+                            android:layout_height="16dp"
+                            android:layout_gravity="start|center_vertical"
+                            android:background="@drawable/bg_race_progress_fill" />
+                    </FrameLayout>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp">
 
                         <TextView
                             android:id="@+id/textMarkerStart"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="top|start"
+                            android:layout_alignParentStart="true"
                             android:text="@string/race_marker_start"
                             android:textColor="#FFFFFF"
-                            android:textAppearance="?attr/textAppearanceBody2" />
-
-                        <TextView
-                            android:id="@+id/textMarkerMiddle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical|start"
-                            android:text="@string/race_marker_middle"
-                            android:textColor="#E0E0E0"
                             android:textAppearance="?attr/textAppearanceBody2" />
 
                         <TextView
                             android:id="@+id/textMarkerFinish"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="bottom|start"
+                            android:layout_alignParentEnd="true"
                             android:text="@string/race_marker_finish"
                             android:textColor="#E0E0E0"
                             android:textAppearance="?attr/textAppearanceBody2" />
-                    </FrameLayout>
-
-                    <FrameLayout
-                        android:id="@+id/raceProgressTrack"
-                        android:layout_width="32dp"
-                        android:layout_height="match_parent">
-
-                        <View
-                            android:id="@+id/raceProgressBg"
-                            android:layout_width="16dp"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center_horizontal"
-                            android:background="@drawable/bg_race_progress_track" />
-
-                        <View
-                            android:id="@+id/raceProgressFill"
-                            android:layout_width="16dp"
-                            android:layout_height="0dp"
-                            android:layout_gravity="top|center_horizontal"
-                            android:background="@drawable/bg_race_progress_fill" />
-                    </FrameLayout>
+                    </RelativeLayout>
                 </LinearLayout>
-
-                <TextView
-                    android:id="@+id/textRaceStage"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:textAppearance="?attr/textAppearanceBody2"
-                    android:textColor="#FFFFFF"
-                    tools:text="Race in progress..." />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnStopRace"
-            style="@style/Widget.TrackNavigator.Button"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="@string/stop_race"
-            android:textColor="@color/md_theme_onPrimary"
-            android:textStyle="bold"
-            app:backgroundTint="#FFFFFF"
-            app:icon="@drawable/ic_btn_stop"
-            app:iconTint="@color/md_theme_onPrimary"
-            android:elevation="8dp" />
     </LinearLayout>
 </FrameLayout>

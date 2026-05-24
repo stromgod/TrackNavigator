@@ -100,9 +100,9 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
 
     private View layoutSetup, layoutActiveRace;
     private TextView textDistToStart;
-    private TextView textCheckpoint, textDeviation;
+    private TextView textDeviation;
     private ImageView imgDirectionArrow;
-    private TextView textMarkerStart, textMarkerMiddle, textMarkerFinish, textRaceStage;
+    private TextView textMarkerStart, textMarkerFinish;
     private View raceProgressTrack, raceProgressFill;
     private ProgressBar progressGpsSetup;
     private ImageView imgGpsCheckSetup;
@@ -134,16 +134,13 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
         progressGpsSetup = findViewById(R.id.progressGpsSetup);
         imgGpsCheckSetup = findViewById(R.id.imgGpsCheckSetup);
 
-        textCheckpoint = findViewById(R.id.textCheckpoint);
         imgDirectionArrow = findViewById(R.id.imgDirectionArrow);
         textDeviation = findViewById(R.id.textDeviation);
 
         raceProgressTrack = findViewById(R.id.raceProgressTrack);
         raceProgressFill = findViewById(R.id.raceProgressFill);
         textMarkerStart = findViewById(R.id.textMarkerStart);
-        textMarkerMiddle = findViewById(R.id.textMarkerMiddle);
         textMarkerFinish = findViewById(R.id.textMarkerFinish);
-        textRaceStage = findViewById(R.id.textRaceStage);
 
         btnPickGpx = findViewById(R.id.btnPickGpx);
         btnStartRace = findViewById(R.id.btnStartRace);
@@ -291,7 +288,6 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
             switchToRaceLayout(true);
         }
 
-        if (textCheckpoint != null) textCheckpoint.setText(state.checkpointText);
         if (textDeviation != null) textDeviation.setText(state.deviationText);
         
         updateDirectionArrow(state);
@@ -335,36 +331,24 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
     }
 
     private void updateRaceProgress(@NonNull RaceUiState state) {
-        if (textRaceStage != null) textRaceStage.setText(stageLabel(state.routeStage));
         applyMarkerHighlight(state.routeStage);
 
         if (raceProgressTrack != null && raceProgressFill != null) {
             raceProgressTrack.post(() -> {
-                int trackHeight = raceProgressTrack.getHeight();
-                if (trackHeight <= 0) return;
-                int fillHeight = Math.round(trackHeight * state.progressFraction);
+                int trackWidth = raceProgressTrack.getWidth();
+                if (trackWidth <= 0) return;
+                int fillWidth = Math.round(trackWidth * state.progressFraction);
                 ViewGroup.LayoutParams params = raceProgressFill.getLayoutParams();
-                params.height = fillHeight;
+                params.width = fillWidth;
                 raceProgressFill.setLayoutParams(params);
             });
         }
-    }
-
-    @NonNull
-    private String stageLabel(int routeStage) {
-        if (routeStage == 2) return getString(R.string.race_stage_finish);
-        if (routeStage == 1) return getString(R.string.race_stage_middle);
-        return getString(R.string.race_stage_start);
     }
 
     private void applyMarkerHighlight(int routeStage) {
         if (textMarkerStart != null) {
             textMarkerStart.setTextColor(routeStage == 0 ? colorMarkerActive : colorMarkerDefault);
             textMarkerStart.setTypeface(null, routeStage == 0 ? Typeface.BOLD : Typeface.NORMAL);
-        }
-        if (textMarkerMiddle != null) {
-            textMarkerMiddle.setTextColor(routeStage == 1 ? colorMarkerActive : colorMarkerDefault);
-            textMarkerMiddle.setTypeface(null, routeStage == 1 ? Typeface.BOLD : Typeface.NORMAL);
         }
         if (textMarkerFinish != null) {
             textMarkerFinish.setTextColor(routeStage == 2 ? colorMarkerActive : colorMarkerDefault);
