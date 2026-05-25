@@ -45,7 +45,7 @@ import java.util.Locale;
 public class RecordTrackActivity extends AppCompatActivity {
 
     private static final int REQ_PERM = 1001;
-    private static final float MAX_ACCURACY_METERS = 8f;
+    private static final float MAX_ACCURACY_METERS = 15f; // Increased to allow "Poor" but showing
     private static final long GPS_MIN_INTERVAL_MS = 500L;
     private static final long FIX_BUFFER_MAX_AGE_MS = 10_000L;
     private static final int FIX_BUFFER_MAX_SIZE = 32;
@@ -67,7 +67,7 @@ public class RecordTrackActivity extends AppCompatActivity {
     };
 
     private String pendingSaveFileName;
-    private TextView textCoords, textAccuracy, textPointsCount, textDistance;
+    private TextView textAccuracy, textPointsCount, textDistance;
     private ProgressBar progressGps;
     private ImageView imgGpsCheck;
     private MaterialButton btnAddPoint, btnFinish;
@@ -81,7 +81,6 @@ public class RecordTrackActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_record);
 
-        textCoords = findViewById(R.id.textCoords);
         textAccuracy = findViewById(R.id.textAccuracy);
         textPointsCount = findViewById(R.id.textPointsCount);
         textDistance = findViewById(R.id.textDistance);
@@ -129,8 +128,8 @@ public class RecordTrackActivity extends AppCompatActivity {
         boolean enabled = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) ? lm.isLocationEnabled() : lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
         
         if (!enabled) {
-            progressGps.setVisibility(View.GONE);
-            imgGpsCheck.setVisibility(View.GONE);
+            if (progressGps != null) progressGps.setVisibility(View.GONE);
+            if (imgGpsCheck != null) imgGpsCheck.setVisibility(View.GONE);
             Toast.makeText(this, R.string.enable_gps_toast, Toast.LENGTH_LONG).show();
             return;
         }
@@ -178,23 +177,37 @@ public class RecordTrackActivity extends AppCompatActivity {
 
     private void updateGpsUi() {
         if (lastFix == null) {
-            progressGps.setVisibility(View.VISIBLE);
-            imgGpsCheck.setVisibility(View.GONE);
-            textCoords.setText("—");
-            textAccuracy.setText("—");
+            if (progressGps != null) progressGps.setVisibility(View.VISIBLE);
+            if (imgGpsCheck != null) imgGpsCheck.setVisibility(View.GONE);
+            if (textAccuracy != null) textAccuracy.setText("—");
             return;
         }
-        progressGps.setVisibility(View.GONE);
-        imgGpsCheck.setVisibility(View.VISIBLE);
-        textCoords.setText(getString(R.string.coords_label, lastFix.getLatitude(), lastFix.getLongitude()));
-        textAccuracy.setText(getString(R.string.accuracy_label, lastFix.hasAccuracy() ? String.format(Locale.US, "%.1f", lastFix.getAccuracy()) : "—"));
+        if (progressGps != null) progressGps.setVisibility(View.GONE);
+        if (imgGpsCheck != null) imgGpsCheck.setVisibility(View.VISIBLE);
+
+        if (textAccuracy != null) {
+            float acc = lastFix.getAccuracy();
+            String accText;
+            if (acc < 5) {
+                accText = getString(R.string.accuracy_high);
+            } else if (acc <= 8) {
+                accText = getString(R.string.accuracy_good);
+            } else if (acc <= 10) {
+                accText = getString(R.string.accuracy_medium);
+            } else {
+                accText = getString(R.string.accuracy_poor);
+            }
+            textAccuracy.setText(accText);
+        }
     }
 
     private void addControlPoint() {
         Location fix = getBestRecentFix();
         if (fix == null) fix = lastFix;
         if (fix == null) { Toast.makeText(this, R.string.gps_waiting, Toast.LENGTH_SHORT).show(); return; }
-        if (!fix.hasAccuracy() || fix.getAccuracy() > MAX_ACCURACY_METERS) {
+        
+        // We still allow adding if it's reasonably accurate, or you might want to block "Poor"
+        if (!fix.hasAccuracy() || fix.getAccuracy() > 15f) {
             Toast.makeText(this, R.string.accuracy_too_poor, Toast.LENGTH_LONG).show();
             return;
         }
@@ -210,8 +223,8 @@ public class RecordTrackActivity extends AppCompatActivity {
     }
 
     private void refreshUiLabels() {
-        textPointsCount.setText(getString(R.string.points_count, controlPoints.size()));
-        textDistance.setText(getString(R.string.distance_label, totalDistanceKm));
+        if (textPointsCount != null) textPointsCount.setText(getString(R.string.points_count, controlPoints.size()));
+        if (textDistance != null) textDistance.setText(getString(R.string.distance_label, totalDistanceKm));
     }
 
     private void saveGpxAndFinish() {
@@ -255,7 +268,9 @@ public class RecordTrackActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        fusedLocationClient.removeLocationUpdates(locationCallback);
+        if (fusedLocationClient != null) {
+            fusedLocationClient.removeLocationUpdates(locationCallback);
+        }
         super.onDestroy();
     }
 }

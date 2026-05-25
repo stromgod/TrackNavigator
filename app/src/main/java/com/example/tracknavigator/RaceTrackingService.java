@@ -123,7 +123,10 @@ public class RaceTrackingService extends Service {
 
     @Nullable private SoundPool soundPool;
     private int warningSoundId;
+    private int middleSoundId;
+    private int finishSoundId;
     private boolean soundLoaded;
+    private boolean hasPlayedMiddleSound;
 
     public void setUiListener(@Nullable UiListener listener) {
         uiListener = listener;
@@ -226,6 +229,7 @@ public class RaceTrackingService extends Service {
     private void beginSession(@NonNull List<LatLngPoint> points) {
         mainHandler.removeCallbacks(tickRunnable);
         lastUiState = null;
+        hasPlayedMiddleSound = false;
         initSoundPool();
         track = points;
         segmentStartIndex = 0;
@@ -246,10 +250,28 @@ public class RaceTrackingService extends Service {
         lastUiState = step.ui;
         
         maybePlayDeviationWarning(step.ui);
+        maybePlayMilestoneSounds(step.ui, step.raceFinished);
+        
         updateNotification(step.ui, step.checkpointJustPassed);
 
         if (uiListener != null) uiListener.onRaceUiState(step.ui);
         if (step.raceFinished) onRaceCompleted();
+    }
+
+    private void maybePlayMilestoneSounds(@NonNull RaceUiState ui, boolean raceFinished) {
+        if (!soundLoaded || soundPool == null) return;
+
+        // Финиш
+        if (raceFinished && finishSoundId != 0) {
+            soundPool.play(finishSoundId, 1.0f, 1.0f, 1, 0, 1.0f);
+            return;
+        }
+
+        // Половина дистанции
+        if (!hasPlayedMiddleSound && ui.routeStage == RaceUiState.STAGE_MIDDLE && middleSoundId != 0) {
+            soundPool.play(middleSoundId, 1.0f, 1.0f, 1, 0, 1.0f);
+            hasPlayedMiddleSound = true;
+        }
     }
 
     private void onRaceCompleted() {
@@ -307,7 +329,7 @@ public class RaceTrackingService extends Service {
         if (ui.deviationBgKind != RaceEvaluator.BG_WARNING) { lastDeviationBgForSound = ui.deviationBgKind; return; }
         long now = SystemClock.elapsedRealtime();
         if (lastDeviationBgForSound != RaceEvaluator.BG_WARNING || (now - lastDeviationSoundElapsedRealtimeMs) >= DEVIATION_SOUND_REPEAT_MS) {
-            if (soundPool != null && soundLoaded) soundPool.play(warningSoundId, 1.0f, 1.0f, 1, 0, 1.0f);
+            if (soundPool != null && soundLoaded && warningSoundId != 0) soundPool.play(warningSoundId, 1.0f, 1.0f, 1, 0, 1.0f);
             lastDeviationSoundElapsedRealtimeMs = now;
         }
         lastDeviationBgForSound = ui.deviationBgKind;
@@ -315,10 +337,18 @@ public class RaceTrackingService extends Service {
 
     private void initSoundPool() {
         if (soundPool != null) return;
-        soundPool = new SoundPool.Builder().setMaxStreams(1).setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build()).build();
+        soundPool = new SoundPool.Builder().setMaxStreams(3).setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build()).build();
         soundPool.setOnLoadCompleteListener((p, s, st) -> soundLoaded = (st == 0));
-        int resId = getResources().getIdentifier("deviation_warning", "raw", getPackageName());
-        if (resId != 0) warningSoundId = soundPool.load(this, resId, 1);
+        
+        String pkg = getPackageName();
+        int warnRes = getResources().getIdentifier("deviation_warning", "raw", pkg);
+        if (warnRes != 0) warningSoundId = soundPool.load(this, warnRes, 1);
+        
+        int middleRes = getResources().getIdentifier("race_middle", "raw", pkg);
+        if (middleRes != 0) middleSoundId = soundPool.load(this, middleRes, 1);
+        
+        int finishRes = getResources().getIdentifier("race_finish", "raw", pkg);
+        if (finishRes != 0) finishSoundId = soundPool.load(this, finishRes, 1);
     }
 
     private void releaseSoundPool() { if (soundPool != null) { soundPool.release(); soundPool = null; soundLoaded = false; } }

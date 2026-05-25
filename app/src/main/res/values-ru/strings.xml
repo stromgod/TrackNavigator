@@ -2,13 +2,17 @@
 <resources>
     <string name="app_name">Трек-навигатор</string>
     <string name="module_record">Запись</string>
-    <string name="module_race">Гонка</string>
+    <string name="module_race">Заезд</string>
     <string name="exit_app">Выход</string>
     <string name="start_gps">Включить GPS</string>
     <string name="add_control_point">Точка</string>
-    <string name="finish_track">Финиш</string>
+    <string name="finish_track">Запись</string>
     <string name="cancel_record">Отмена</string>
-    <string name="accuracy_label">Точность: %1$s м</string>
+    <string name="accuracy_label">Точность: %1$s</string>
+    <string name="accuracy_high">Высокая точность</string>
+    <string name="accuracy_good">Хорошая точность</string>
+    <string name="accuracy_medium">Средняя точность</string>
+    <string name="accuracy_poor">Плохая точность</string>
     <string name="coords_label">Шир.: %1$.7f  Долг.: %2$.7f</string>
     <string name="points_count">Точек: %1$d</string>
     <string name="distance_label">Дистанция: %1$.2f км</string>
@@ -31,16 +35,16 @@
     <string name="gpx_invalid_file">Некорректный трек.</string>
     <string name="gpx_loaded_points">Загружено точек: %1$d</string>
     <string name="gpx_parse_error">Ошибка: %1$s</string>
-    <string name="start_race">Старт гонки</string>
+    <string name="start_race">Старт</string>
     <string name="stop_race">Стоп</string>
     <string name="checkpoint_progress">Точка %1$d / %2$d</string>
-    <string name="deviation_left">ЛЕВО</string>
-    <string name="deviation_right">ПРАВО</string>
-    <string name="on_track">На трассе</string>
+    <string name="deviation_left">ЛЕВЕЕ</string>
+    <string name="deviation_right">ПРАВЕЕ</string>
+    <string name="on_track">На курсе</string>
     <string name="race_finished">ФИНИШ!</string>
     <string name="permission_rationale">Требуется доступ к GPS.</string>
-    <string name="race_notif_channel_name">Активная гонка</string>
-    <string name="race_notif_title">Гонка</string>
+    <string name="race_notif_channel_name">Активный заезд</string>
+    <string name="race_notif_title">Заезд</string>
     <string name="wait_at_start">На старт</string>
     <string name="dist_to_start">До старта: %1$.1f м</string>
     <string name="checkpoint_passed">Пройдено!</string>
@@ -50,6 +54,7 @@
     <string name="race_marker_finish">Финиш</string>
     <string name="race_stage_start">Начало</string>
     <string name="race_stage_middle">Середина</string>
-    <string name="race_stage_finish">Финишная прямая</string>
+    <string name="race_stage_finish">Финиш</string>
     <string name="race_progress_desc">Точка %1$d из %2$d</string>
+    <string name="cannot_record_during_race">Запись недоступна во время заезда.</string>
 </resources>

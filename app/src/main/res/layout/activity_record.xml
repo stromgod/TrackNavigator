@@ -9,7 +9,9 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:paddingBottom="180dp"
+        android:clipToPadding="false">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -17,15 +19,10 @@
             android:orientation="vertical"
             android:padding="24dp">
 
-            <!-- Logo at the top -->
-            <ImageView
+            <!-- Spacer instead of logo -->
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="160dp"
-                android:layout_marginBottom="32dp"
-                android:importantForAccessibility="no"
-                android:scaleType="centerInside"
-                android:src="@drawable/ic_hero_route"
-                app:tint="#FFFFFF" />
+                android:layout_height="48dp" />
 
             <com.google.android.material.card.MaterialCardView
                 style="@style/Widget.TrackNavigator.Card"
@@ -43,7 +40,6 @@
                     android:orientation="vertical"
                     android:padding="20dp">
 
-                    <!-- GPS Indicator -->
                     <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
@@ -68,16 +64,7 @@
                             android:visibility="gone" />
                     </FrameLayout>
 
-                    <TextView
-                        android:id="@+id/textCoords"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="monospace"
-                        android:paddingBottom="6dp"
-                        android:gravity="center"
-                        android:textColor="#FFFFFF"
-                        android:textAppearance="?attr/textAppearanceBody2"
-                        tools:text="Lat: 55.1234 Lon: 37.5678" />
+                    <!-- textCoords removed -->
 
                     <TextView
                         android:id="@+id/textAccuracy"
@@ -85,9 +72,10 @@
                         android:layout_height="wrap_content"
                         android:paddingBottom="16dp"
                         android:gravity="center"
-                        android:textColor="#E0E0E0"
-                        android:textAppearance="?attr/textAppearanceBody2"
-                        tools:text="Accuracy: 3.2m" />
+                        android:textColor="#FFFFFF"
+                        android:textAppearance="?attr/textAppearanceBody1"
+                        android:textStyle="bold"
+                        tools:text="Высокая точность" />
 
                     <View
                         android:layout_width="match_parent"
@@ -103,7 +91,7 @@
                         android:textStyle="bold"
                         android:gravity="center"
                         android:textColor="#FFFFFF"
-                        tools:text="Points: 12" />
+                        tools:text="Точек: 12" />
 
                     <TextView
                         android:id="@+id/textDistance"
@@ -114,45 +102,55 @@
                         android:textColor="#E0E0E0"
                         android:gravity="center"
                         android:alpha="0.8"
-                        tools:text="Distance: 1.45 km" />
+                        tools:text="Дистанция: 1.45 км" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
-
-            <!-- Action Buttons -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnAddPoint"
-                style="@style/Widget.TrackNavigator.Button"
-                android:layout_width="match_parent"
-                android:layout_height="64dp"
-                android:layout_marginBottom="20dp"
-                android:enabled="false"
-                android:text="@string/add_control_point"
-                android:textColor="@color/md_theme_onPrimary"
-                app:backgroundTint="#FFFFFF"
-                app:icon="@drawable/ic_btn_add_pin"
-                app:iconTint="@color/md_theme_onPrimary"
-                android:elevation="12dp"
-                android:stateListAnimator="@null"
-                android:translationZ="6dp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnFinish"
-                style="@style/Widget.TrackNavigator.Button"
-                android:layout_width="match_parent"
-                android:layout_height="64dp"
-                android:layout_marginBottom="20dp"
-                android:enabled="false"
-                android:text="@string/finish_track"
-                android:textColor="@color/md_theme_onPrimary"
-                app:backgroundTint="#FFFFFF"
-                app:icon="@drawable/ic_btn_save_gpx"
-                app:iconTint="@color/md_theme_onPrimary"
-                android:elevation="12dp"
-                android:stateListAnimator="@null"
-                android:translationZ="6dp" />
-
         </LinearLayout>
     </ScrollView>
+
+    <!-- Bottom Buttons Area -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAddPoint"
+            style="@style/Widget.TrackNavigator.Button"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_marginBottom="16dp"
+            android:enabled="false"
+            android:text="@string/add_control_point"
+            android:textColor="@color/md_theme_onPrimary"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:backgroundTint="#FFFFFF"
+            app:icon="@drawable/ic_btn_add_pin"
+            app:iconTint="@color/md_theme_onPrimary"
+            app:iconSize="28dp"
+            android:elevation="12dp"
+            android:translationZ="6dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnFinish"
+            style="@style/Widget.TrackNavigator.Button"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:enabled="false"
+            android:text="@string/finish_track"
+            android:textColor="@color/md_theme_onPrimary"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:backgroundTint="#FFFFFF"
+            app:icon="@drawable/ic_btn_save_gpx"
+            app:iconTint="@color/md_theme_onPrimary"
+            app:iconSize="28dp"
+            android:elevation="12dp"
+            android:translationZ="6dp" />
+    </LinearLayout>
 
     <!-- Top-right Exit/Cancel Button -->
     <com.google.android.material.button.MaterialButton
