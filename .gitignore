@@ -1,7 +1,9 @@
 # Gradle and Android build artifacts
 /.gradle/
 /build/
-/app/build/
+/app/build/generated
+/app/build/intermediates
+/app/build/tmp
 /app/release/
 
 # Local machine configuration
