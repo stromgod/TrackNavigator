@@ -2,10 +2,11 @@
 <resources>
     <string name="app_name">Трек-навигатор</string>
     <string name="module_record">Запись</string>
-    <string name="module_race">Заезд</string>
+    <string name="module_race">Забег</string>
     <string name="exit_app">Выход</string>
     <string name="start_gps">Включить GPS</string>
     <string name="add_control_point">Точка</string>
+    <string name="btn_save_track_text">Запись</string>
     <string name="finish_track">Запись</string>
     <string name="cancel_record">Отмена</string>
     <string name="accuracy_label">Точность: %1$s</string>
@@ -44,7 +45,7 @@
     <string name="race_finished">ФИНИШ!</string>
     <string name="permission_rationale">Требуется доступ к GPS.</string>
     <string name="race_notif_channel_name">Активный заезд</string>
-    <string name="race_notif_title">Заезд</string>
+    <string name="race_notif_title">Забег</string>
     <string name="wait_at_start">На старт</string>
     <string name="dist_to_start">До старта: %1$.1f м</string>
     <string name="checkpoint_passed">Пройдено!</string>
@@ -57,4 +58,18 @@
     <string name="race_stage_finish">Финиш</string>
     <string name="race_progress_desc">Точка %1$d из %2$d</string>
     <string name="cannot_record_during_race">Запись недоступна во время заезда.</string>
+
+    <!-- Bot onboarding -->
+    <string name="bot_name_dialog_title">Привет! Как тебя зовут?</string>
+    <string name="bot_name_dialog_hint">Твоё имя</string>
+    <string name="bot_intro_message">Я Ботик из TrackNavigator. Давай познакомимся — как тебя зовут?</string>
+    <string name="bot_guide_press_record">Отлично, %1$s! Нажми «Запись» и включи GPS.</string>
+    <string name="bot_guide_record_in_record">Поставь первую точку на старте, затем добавляй контрольные точки: нажимай «Точка» примерно каждые 10–15 секунд.</string>
+    <string name="bot_guide_gps_disabled">Пожалуйста, включи GPS. Иначе контрольные точки будут неточными.</string>
+    <string name="bot_guide_after_save">Трек сохранён. Веду тебя в модуль забега…</string>
+    <string name="bot_guide_race_setup">Идём на старт. Когда окажешься рядом — нажми «Старт».</string>
+    <string name="bot_happy_on_track">Happy: Ты на курсе!</string>
+    <string name="bot_bad_off_track">Bad: Ты свернул. Выравнивайся по маршруту.</string>
+    <string name="bot_race_finished">Отлично, %1$s! Время: %2$s. Дистанция: %3$s км.</string>
+
 </resources>

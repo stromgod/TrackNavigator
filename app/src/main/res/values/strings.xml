@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">Track Navigator</string>
     <string name="module_record">Запись</string>
-    <string name="module_race">Заезд</string>
+    <string name="module_race">Забег</string>
     <string name="exit_app">Выход</string>
     <string name="start_gps">Запуск GPS</string>
     <string name="add_control_point">Точка</string>
@@ -39,11 +39,27 @@
     <string name="on_track">На курсе</string>
     <string name="race_finished">ФИНИШ!</string>
     <string name="race_notif_channel_name">Active Race</string>
-    <string name="race_notif_title">Заезд</string>
+    <string name="race_notif_title">Забег</string>
     <string name="dist_to_start">До старта: %1$.1f м</string>
     <string name="checkpoint_passed">Пройдено!</string>
     <string name="race_progress_title">Прогресс</string>
     <string name="race_marker_start">Старт</string>
     <string name="race_marker_finish">Финиш</string>
     <string name="cannot_record_during_race">Запись недоступна во время заезда.</string>
+
+    <!-- Bot onboarding -->
+    <string name="bot_name_dialog_title">Hi! What\'s your name?</string>
+    <string name="bot_name_dialog_hint">Your name</string>
+    <string name="bot_intro_message">I\'m Botik from TrackNavigator. Let\'s get started - what\'s your name?</string>
+    <string name="bot_guide_press_record">Great, %1$s! Tap &quot;Record&quot; and turn on GPS.</string>
+    <string name="bot_guide_record_in_record">Start from the starting line, then add control points: press &quot;Point&quot; roughly every 10-15 seconds.</string>
+    <string name="bot_guide_gps_disabled">Please enable GPS. Otherwise the control points won’t be accurate.</string>
+    <string name="bot_guide_after_save">Track saved. Taking you to the race module…</string>
+    <string name="bot_guide_race_setup">Now go to the start. When you\'re close, tap &quot;Start&quot;.</string>
+    <string name="bot_happy_on_track">Happy: You\'re on track!</string>
+    <string name="bot_bad_off_track">Bad: You turned off route. Realign to the line.</string>
+    <string name="bot_race_finished">Awesome, %1$s! Finish time: %2$s. Distance: %3$s km.</string>
+
+    <string name="bot_generic_welcome">Botik here — let’s run!</string>
+
 </resources>

@@ -2,6 +2,7 @@ package com.example.tracknavigator;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -32,6 +33,7 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -75,6 +77,10 @@ public class RecordTrackActivity extends AppCompatActivity {
     private ImageView imgGpsCheck;
     private MaterialButton btnAddPoint, btnFinish;
 
+    private MaterialCardView layoutBotRecord;
+    private ImageView imgBotRecord;
+    private TextView textBotRecord;
+
     private final ActivityResultLauncher<String> createDocumentLauncher = registerForActivityResult(
             new ActivityResultContracts.CreateDocument("application/gpx+xml"),
             this::onCustomSaveLocationPicked);
@@ -95,10 +101,25 @@ public class RecordTrackActivity extends AppCompatActivity {
         btnFinish = findViewById(R.id.btnFinish);
         MaterialButton btnBack = findViewById(R.id.btnBack);
 
+        layoutBotRecord = findViewById(R.id.layoutBotRecord);
+        imgBotRecord = findViewById(R.id.imgBotRecord);
+        textBotRecord = findViewById(R.id.textBotRecord);
+
+        refreshBotUi();
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        btnAddPoint.setOnClickListener(v -> addControlPoint());
-        btnFinish.setOnClickListener(v -> saveGpxAndFinish());
+        btnAddPoint.setOnClickListener(v -> {
+            addControlPoint();
+            if (!BotPrefs.isOnboardingDone(this)) {
+                if (controlPoints.size() >= 2) {
+                    showBotMessage(R.string.bot_guide_record_in_record);
+                }
+            }
+        });
+        btnFinish.setOnClickListener(v -> {
+            saveGpxAndFinish();
+        });
         btnBack.setOnClickListener(v -> finish());
 
         refreshUiLabels();
@@ -136,6 +157,9 @@ public class RecordTrackActivity extends AppCompatActivity {
             if (progressGps != null) progressGps.setVisibility(View.GONE);
             if (imgGpsCheck != null) imgGpsCheck.setVisibility(View.GONE);
             Toast.makeText(this, R.string.enable_gps_toast, Toast.LENGTH_LONG).show();
+            if (!BotPrefs.isOnboardingDone(this)) {
+                showBotMessage(R.string.bot_guide_gps_disabled);
+            }
             return;
         }
 
@@ -147,6 +171,10 @@ public class RecordTrackActivity extends AppCompatActivity {
             fusedLocationClient.requestLocationUpdates(request, locationCallback, Looper.getMainLooper());
             btnAddPoint.setEnabled(true);
             btnFinish.setEnabled(true);
+
+            if (!BotPrefs.isOnboardingDone(this)) {
+                showBotMessage(R.string.bot_guide_record_in_record);
+            }
         } catch (SecurityException ignored) {}
     }
 
@@ -256,6 +284,15 @@ public class RecordTrackActivity extends AppCompatActivity {
             if (os != null) {
                 GpxHelper.writeTrack(os, trackName, controlPoints);
                 Toast.makeText(this, R.string.gpx_saved, Toast.LENGTH_LONG).show();
+
+                if (!BotPrefs.isOnboardingDone(this)) {
+                    BotPrefs.setStep(this, BotPrefs.Step.GUIDE_RACE);
+                }
+
+                // Lead user to race module with preloaded control points.
+                Intent goToRace = new Intent(this, RaceActivity.class);
+                goToRace.putExtra(RaceActivity.EXTRA_TRACK_POINTS, new ArrayList<>(controlPoints));
+                startActivity(goToRace);
                 finish();
             }
         } catch (IOException e) {
@@ -263,6 +300,29 @@ public class RecordTrackActivity extends AppCompatActivity {
         } finally {
             pendingSaveFileName = null;
         }
+    }
+
+    private void refreshBotUi() {
+        if (layoutBotRecord == null || imgBotRecord == null || textBotRecord == null) return;
+        if (BotPrefs.isOnboardingDone(this)) {
+            layoutBotRecord.setVisibility(View.GONE);
+            return;
+        }
+        BotAssets.setBotIcon(this, imgBotRecord, "Greetings.png");
+
+        // Default message. GPS readiness is handled in startGpsUpdates().
+        if (controlPoints.isEmpty()) {
+            textBotRecord.setText(getString(R.string.bot_guide_record_in_record));
+        }
+        layoutBotRecord.setVisibility(View.VISIBLE);
+    }
+
+    private void showBotMessage(int stringResId) {
+        if (layoutBotRecord == null || imgBotRecord == null || textBotRecord == null) return;
+        if (BotPrefs.isOnboardingDone(this)) return;
+        BotAssets.setBotIcon(this, imgBotRecord, "Greetings.png");
+        textBotRecord.setText(getString(stringResId));
+        layoutBotRecord.setVisibility(View.VISIBLE);
     }
 
     @Override

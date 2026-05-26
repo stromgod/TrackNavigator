@@ -26,6 +26,14 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
     buildToolsVersion '36.1.0'
+
+    // Pack onboarding images from repo-root `Botik/` as regular app assets.
+    // Then we can load them at runtime via AssetManager in Java code.
+    sourceSets {
+        main {
+            assets.srcDirs += ['../Botik']
+        }
+    }
 }
 
 dependencies {

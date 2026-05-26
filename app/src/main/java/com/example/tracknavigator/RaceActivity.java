@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Handler;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -37,6 +38,7 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -44,6 +46,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Activity for Module 2: Race on track.
@@ -60,6 +63,17 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
     private boolean serviceBound;
     private Location lastPreviewLocation;
     private boolean isStopping = false;
+
+    public static final String EXTRA_TRACK_POINTS = "extra_track_points";
+
+    private MaterialCardView layoutBotRace;
+    private ImageView imgBotRace;
+    private TextView textBotRace;
+
+    private boolean trackPreloaded = false;
+    private long raceStartMs = 0;
+    private int lastBotMode = -1; // 0 = happy, 1 = bad
+    private final Handler uiHandler = new Handler(Looper.getMainLooper());
 
     private FusedLocationProviderClient fusedClient;
     private final LocationCallback previewLocationCallback = new LocationCallback() {
@@ -126,10 +140,25 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_race);
 
+        // Optional: preloaded track points from RecordTrackActivity.
+        Object extra = getIntent().getSerializableExtra(EXTRA_TRACK_POINTS);
+        if (extra instanceof ArrayList) {
+            ArrayList<?> list = (ArrayList<?>) extra;
+            if (!list.isEmpty() && list.get(0) instanceof LatLngPoint) {
+                //noinspection unchecked
+                track = (ArrayList<LatLngPoint>) extra;
+                if (track != null && track.size() >= 2) trackPreloaded = true;
+            }
+        }
+
         fusedClient = LocationServices.getFusedLocationProviderClient(this);
 
         layoutSetup = findViewById(R.id.layoutSetup);
         layoutActiveRace = findViewById(R.id.layoutActiveRace);
+
+        layoutBotRace = findViewById(R.id.layoutBotRace);
+        imgBotRace = findViewById(R.id.imgBotRace);
+        textBotRace = findViewById(R.id.textBotRace);
 
         textDistToStart = findViewById(R.id.textDistToStart);
         progressGpsSetup = findViewById(R.id.progressGpsSetup);
@@ -148,11 +177,17 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
         MaterialButton btnStopRace = findViewById(R.id.btnStopRace);
         MaterialButton btnBackSetup = findViewById(R.id.btnBackFromSetup);
 
-        if (btnStopRace != null) btnStopRace.setOnClickListener(v -> stopRaceUser());
+        if (btnStopRace != null) btnStopRace.setOnClickListener(v -> stopRaceUser(0));
         if (btnBackSetup != null) btnBackSetup.setOnClickListener(v -> exitModule());
 
         btnPickGpx.setOnClickListener(v -> pickGpx());
-        btnStartRace.setOnClickListener(v -> startRace());
+        btnStartRace.setOnClickListener(v -> {
+            raceStartMs = System.currentTimeMillis();
+            if (!BotPrefs.isOnboardingDone(this)) {
+                BotPrefs.setStep(this, BotPrefs.Step.IN_RACE);
+            }
+            startRace();
+        });
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -168,6 +203,7 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
             switchToRaceLayout(false);
             updateSetupButtons();
             checkPermissionsAndEnableGps();
+            refreshBotUiForSetup();
         }
     }
 
@@ -187,7 +223,7 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
     }
 
     private void updateSetupButtons() {
-        if (btnPickGpx != null) btnPickGpx.setEnabled(true);
+        if (btnPickGpx != null) btnPickGpx.setEnabled(!trackPreloaded);
         checkStartEligibility();
     }
 
@@ -298,9 +334,12 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
         if (state.checkpointJustPassed) {
             Toast.makeText(this, R.string.checkpoint_passed, Toast.LENGTH_SHORT).show();
         }
+
+        refreshBotForRaceState(state);
+
         if (state.raceFinished) {
             Toast.makeText(this, R.string.race_finished, Toast.LENGTH_LONG).show();
-            stopRaceUser();
+            stopRaceUser(2000);
         }
     }
 
@@ -355,7 +394,76 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
         }
     }
 
-    private void stopRaceUser() {
+    private void refreshBotUiForSetup() {
+        if (layoutBotRace == null || imgBotRace == null || textBotRace == null) return;
+        if (BotPrefs.isOnboardingDone(this)) {
+            layoutBotRace.setVisibility(View.GONE);
+            return;
+        }
+
+        BotAssets.setBotIcon(this, imgBotRace, "Greetings.png");
+        textBotRace.setText(getString(R.string.bot_guide_race_setup));
+        layoutBotRace.setVisibility(View.VISIBLE);
+    }
+
+    private void refreshBotForRaceState(@NonNull RaceUiState state) {
+        if (layoutBotRace == null || imgBotRace == null || textBotRace == null) return;
+        if (BotPrefs.isOnboardingDone(this)) {
+            layoutBotRace.setVisibility(View.GONE);
+            return;
+        }
+
+        if (state.raceFinished) {
+            String name = BotPrefs.getName(this);
+            if (name == null || name.trim().isEmpty()) name = "User";
+
+            String time = formatDuration(Math.max(0, System.currentTimeMillis() - raceStartMs));
+            String distanceKm = computeTrackDistanceKm();
+
+            BotAssets.setBotIcon(this, imgBotRace, "Greetings.png");
+            textBotRace.setText(getString(R.string.bot_race_finished, name, time, distanceKm));
+            layoutBotRace.setVisibility(View.VISIBLE);
+
+            BotPrefs.setStep(this, BotPrefs.Step.DONE);
+            lastBotMode = -1;
+            return;
+        }
+
+        boolean offTrack = state.deviationBgKind == RaceEvaluator.BG_WARNING;
+        if (offTrack) {
+            if (lastBotMode != 1) {
+                BotAssets.setBotIcon(this, imgBotRace, "Bad.png");
+                lastBotMode = 1;
+            }
+            textBotRace.setText(getString(R.string.bot_bad_off_track));
+        } else {
+            if (lastBotMode != 0) {
+                BotAssets.setBotIcon(this, imgBotRace, "Happy.png");
+                lastBotMode = 0;
+            }
+            textBotRace.setText(getString(R.string.bot_happy_on_track));
+        }
+
+        layoutBotRace.setVisibility(View.VISIBLE);
+    }
+
+    private String formatDuration(long durationMs) {
+        long totalSec = Math.max(0, durationMs) / 1000L;
+        long min = totalSec / 60L;
+        long sec = totalSec % 60L;
+        return String.format(Locale.US, "%d:%02d", min, sec);
+    }
+
+    private String computeTrackDistanceKm() {
+        if (track == null || track.size() < 2) return "0.0";
+        double km = 0.0;
+        for (int i = 0; i < track.size() - 1; i++) {
+            km += GeoUtils.distanceMeters(track.get(i), track.get(i + 1)) / 1000.0;
+        }
+        return String.format(Locale.US, "%.2f", km);
+    }
+
+    private void stopRaceUser(long delayMs) {
         if (isStopping) return;
         isStopping = true;
 
@@ -366,9 +474,14 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
         }
         boundService = null;
         track = null;
-        
-        Toast.makeText(this, "Заезд окончен", Toast.LENGTH_SHORT).show();
-        finish();
+
+        Runnable finishTask = () -> {
+            Toast.makeText(this, "Заезд окончен", Toast.LENGTH_SHORT).show();
+            finish();
+        };
+
+        if (delayMs <= 0) finishTask.run();
+        else uiHandler.postDelayed(finishTask, delayMs);
     }
 
     private void exitModule() {
