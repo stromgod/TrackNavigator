@@ -68,8 +68,8 @@
     <string name="bot_guide_gps_disabled">Пожалуйста, включи GPS. Иначе контрольные точки будут неточными.</string>
     <string name="bot_guide_after_save">Трек сохранён. Веду тебя в модуль забега…</string>
     <string name="bot_guide_race_setup">Идём на старт. Когда окажешься рядом — нажми «Старт».</string>
-    <string name="bot_happy_on_track">Happy: Ты на курсе!</string>
-    <string name="bot_bad_off_track">Bad: Ты свернул. Выравнивайся по маршруту.</string>
+    <string name="bot_happy_on_track">Ты на курсе!</string>
+    <string name="bot_bad_off_track">Ты свернул. Выравнивайся по маршруту.</string>
     <string name="bot_race_finished">Отлично, %1$s! Время: %2$s. Дистанция: %3$s км.</string>
 
 </resources>

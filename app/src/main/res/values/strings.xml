@@ -56,8 +56,8 @@
     <string name="bot_guide_gps_disabled">Please enable GPS. Otherwise the control points won’t be accurate.</string>
     <string name="bot_guide_after_save">Track saved. Taking you to the race module…</string>
     <string name="bot_guide_race_setup">Now go to the start. When you\'re close, tap &quot;Start&quot;.</string>
-    <string name="bot_happy_on_track">Happy: You\'re on track!</string>
-    <string name="bot_bad_off_track">Bad: You turned off route. Realign to the line.</string>
+    <string name="bot_happy_on_track">You\'re on track!</string>
+    <string name="bot_bad_off_track">You turned off route. Realign to the line.</string>
     <string name="bot_race_finished">Awesome, %1$s! Finish time: %2$s. Distance: %3$s km.</string>
 
     <string name="bot_generic_welcome">Botik here — let’s run!</string>
