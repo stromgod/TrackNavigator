@@ -1,7 +1,8 @@
 package com.example.tracknavigator;
 
 /**
- * Enhanced geometry utils using n-vector approach for spherical navigation.
+ * Enhanced geometry utils using Haversine for point-to-point distance
+ * and n-vector approach for cross-track deviation logic.
  */
 public final class GeoUtils {
 
@@ -43,14 +44,21 @@ public final class GeoUtils {
     }
 
     /**
-     * Great-circle distance between two points using n-vectors, meters.
+     * Calculates distance between two points using the Haversine formula.
+     * Used for distance to checkpoints and total path length.
      */
     public static double distanceMeters(LatLngPoint p1, LatLngPoint p2) {
-        double[] n1 = toNVector(p1);
-        double[] n2 = toNVector(p2);
-        // Angle between vectors is acos of their dot product
-        double angle = Math.atan2(Math.sqrt(dot(cross(n1, n2), cross(n1, n2))), dot(n1, n2));
-        return angle * EARTH_RADIUS_M;
+        double lat1 = Math.toRadians(p1.latitude);
+        double lat2 = Math.toRadians(p2.latitude);
+        double dLat = lat2 - lat1;
+        double dLon = Math.toRadians(p2.longitude - p1.longitude);
+
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(lat1) * Math.cos(lat2)
+                * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return EARTH_RADIUS_M * c;
     }
 
     /**
@@ -72,6 +80,7 @@ public final class GeoUtils {
 
     /**
      * Cross-track distance from P to the great circle path A-B in meters.
+     * Uses n-vector projection for high accuracy.
      */
     public static double distancePointToSegmentMeters(LatLngPoint a, LatLngPoint b, LatLngPoint p) {
         double[] nA = toNVector(a);
