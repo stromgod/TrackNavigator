@@ -45,7 +45,7 @@ import java.util.Locale;
 public class RecordTrackActivity extends AppCompatActivity {
 
     private static final int REQ_PERM = 1001;
-    private static final float MAX_ACCURACY_METERS = 15f; // Increased to allow "Poor" but showing
+    private static final float MAX_ACCURACY_METERS = 15f; 
     private static final long GPS_MIN_INTERVAL_MS = 500L;
     private static final long FIX_BUFFER_MAX_AGE_MS = 10_000L;
     private static final int FIX_BUFFER_MAX_SIZE = 32;
@@ -55,12 +55,15 @@ public class RecordTrackActivity extends AppCompatActivity {
     private final List<LatLngPoint> controlPoints = new ArrayList<>();
     private Location lastFix;
     private double totalDistanceKm = 0.0;
+    private KalmanFilter kalmanFilter;
 
     private final LocationCallback locationCallback = new LocationCallback() {
         @Override
         public void onLocationResult(@NonNull LocationResult locationResult) {
             for (Location location : locationResult.getLocations()) {
-                pushLocationSample(location);
+                // Smooth coordinates during recording
+                Location smoothed = kalmanFilter.process(location);
+                pushLocationSample(smoothed);
             }
             updateGpsUi();
         }
@@ -80,6 +83,8 @@ public class RecordTrackActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_record);
+
+        kalmanFilter = new KalmanFilter(2f); // High sensitivity for recording (2m threshold)
 
         textAccuracy = findViewById(R.id.textAccuracy);
         textPointsCount = findViewById(R.id.textPointsCount);
@@ -188,15 +193,10 @@ public class RecordTrackActivity extends AppCompatActivity {
         if (textAccuracy != null) {
             float acc = lastFix.getAccuracy();
             String accText;
-            if (acc < 5) {
-                accText = getString(R.string.accuracy_high);
-            } else if (acc <= 8) {
-                accText = getString(R.string.accuracy_good);
-            } else if (acc <= 10) {
-                accText = getString(R.string.accuracy_medium);
-            } else {
-                accText = getString(R.string.accuracy_poor);
-            }
+            if (acc < 5) accText = getString(R.string.accuracy_high);
+            else if (acc <= 8) accText = getString(R.string.accuracy_good);
+            else if (acc <= 10) accText = getString(R.string.accuracy_medium);
+            else accText = getString(R.string.accuracy_poor);
             textAccuracy.setText(accText);
         }
     }
@@ -206,8 +206,7 @@ public class RecordTrackActivity extends AppCompatActivity {
         if (fix == null) fix = lastFix;
         if (fix == null) { Toast.makeText(this, R.string.gps_waiting, Toast.LENGTH_SHORT).show(); return; }
         
-        // We still allow adding if it's reasonably accurate, or you might want to block "Poor"
-        if (!fix.hasAccuracy() || fix.getAccuracy() > 15f) {
+        if (!fix.hasAccuracy() || fix.getAccuracy() > MAX_ACCURACY_METERS) {
             Toast.makeText(this, R.string.accuracy_too_poor, Toast.LENGTH_LONG).show();
             return;
         }

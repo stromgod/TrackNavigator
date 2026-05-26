@@ -1,78 +1,109 @@
 package com.example.tracknavigator;
 
 /**
- * Track geometry: closest point on segment in local ENU; cross-track distance is Haversine(P, C).
- * Left/right uses cross product in ENU.
+ * Enhanced geometry utils using n-vector approach for spherical navigation.
  */
 public final class GeoUtils {
 
-    private static final double EARTH_RADIUS_M = 6371000.0;
+    private static final double EARTH_RADIUS_M = 6371001.0;
 
     private GeoUtils() {}
 
-    /** East (x) and north (y) meters relative to origin (lat0, lon0). */
-    public static double[] toEnMeters(double lat0, double lon0, double lat, double lon) {
-        double dLat = Math.toRadians(lat - lat0);
-        double dLon = Math.toRadians(lon - lon0);
-        double phi = Math.toRadians(lat0);
-        double x = EARTH_RADIUS_M * Math.cos(phi) * dLon;
-        double y = EARTH_RADIUS_M * dLat;
-        return new double[]{x, y};
-    }
-
-    /** Lat/lon of point A offset by (eastM, northM) in local ENU from A. */
-    private static LatLngPoint enuOffsetToLatLng(double lat0, double lon0, double eastM, double northM) {
-        double lat = lat0 + Math.toDegrees(northM / EARTH_RADIUS_M);
-        double cosLat = Math.cos(Math.toRadians(lat0));
-        if (Math.abs(cosLat) < 1e-10) {
-            cosLat = cosLat >= 0 ? 1e-10 : -1e-10;
-        }
-        double lon = lon0 + Math.toDegrees(eastM / (EARTH_RADIUS_M * cosLat));
-        return new LatLngPoint(lat, lon);
-    }
-
     /**
-     * Cross-track distance to segment AB: closest point C on AB (ENU projection), then
-     * Haversine distance from P to C ({@link #distanceMeters}).
+     * Converts Lat/Lng to an n-vector (unit vector pointing from Earth center to the point).
+     * Coordinate system: X=0,0; Y=0,90E; Z=North Pole.
      */
-    public static double distancePointToSegmentMeters(
-            LatLngPoint a, LatLngPoint b, LatLngPoint p) {
-        double[] bEn = toEnMeters(a.latitude, a.longitude, b.latitude, b.longitude);
-        double[] pEn = toEnMeters(a.latitude, a.longitude, p.latitude, p.longitude);
-        double abx = bEn[0];
-        double aby = bEn[1];
-        double apx = pEn[0];
-        double apy = pEn[1];
-        double ab2 = abx * abx + aby * aby;
-        if (ab2 < 1e-4) {
-            return distanceMeters(a, p);
-        }
-        double t = (apx * abx + apy * aby) / ab2;
-        t = Math.max(0.0, Math.min(1.0, t));
-        double cx = abx * t;
-        double cy = aby * t;
-        LatLngPoint c = enuOffsetToLatLng(a.latitude, a.longitude, cx, cy);
-        return distanceMeters(p, c);
+    private static double[] toNVector(LatLngPoint p) {
+        double latRad = Math.toRadians(p.latitude);
+        double lonRad = Math.toRadians(p.longitude);
+        double cosLat = Math.cos(latRad);
+        return new double[] {
+            cosLat * Math.cos(lonRad),
+            cosLat * Math.sin(lonRad),
+            Math.sin(latRad)
+        };
     }
 
     /**
-     * Vector AB is the track direction; z-component of (B−A)×(P−A) in local ENU tangent plane.
-     * Positive: P is left of forward A→B; negative: right.
+     * Vector cross product: a x b
+     */
+    private static double[] cross(double[] a, double[] b) {
+        return new double[] {
+            a[1] * b[2] - a[2] * b[1],
+            a[2] * b[0] - a[0] * b[2],
+            a[0] * b[1] - a[1] * b[0]
+        };
+    }
+
+    /**
+     * Vector dot product: a . b
+     */
+    private static double dot(double[] a, double[] b) {
+        return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+    }
+
+    /**
+     * Great-circle distance between two points using n-vectors, meters.
+     */
+    public static double distanceMeters(LatLngPoint p1, LatLngPoint p2) {
+        double[] n1 = toNVector(p1);
+        double[] n2 = toNVector(p2);
+        // Angle between vectors is acos of their dot product
+        double angle = Math.atan2(Math.sqrt(dot(cross(n1, n2), cross(n1, n2))), dot(n1, n2));
+        return angle * EARTH_RADIUS_M;
+    }
+
+    /**
+     * Calculates the side of the point P relative to the great circle path A -> B.
+     * Uses n-vector cross track error logic.
+     * @return Positive if P is to the LEFT of A->B, negative if to the RIGHT.
      */
     public static double crossTrackSign(LatLngPoint a, LatLngPoint b, LatLngPoint p) {
-        double[] bEn = toEnMeters(a.latitude, a.longitude, b.latitude, b.longitude);
-        double[] pEn = toEnMeters(a.latitude, a.longitude, p.latitude, p.longitude);
-        return bEn[0] * pEn[1] - bEn[1] * pEn[0];
+        double[] nA = toNVector(a);
+        double[] nB = toNVector(b);
+        double[] nP = toNVector(p);
+
+        // Path normal vector
+        double[] pathNormal = cross(nA, nB);
+        
+        // The dot product of nP and pathNormal gives the direction and sin of cross-track angle
+        return dot(nP, pathNormal);
     }
 
-    /** Great-circle distance between two points (Haversine), meters. */
-    public static double distanceMeters(LatLngPoint a, LatLngPoint b) {
-        double lat1 = Math.toRadians(a.latitude);
-        double lat2 = Math.toRadians(b.latitude);
-        double dLat = lat2 - lat1;
-        double dLon = Math.toRadians(b.longitude - a.longitude);
-        double h = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-                + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        return 2 * EARTH_RADIUS_M * Math.asin(Math.min(1.0, Math.sqrt(h)));
+    /**
+     * Cross-track distance from P to the great circle path A-B in meters.
+     */
+    public static double distancePointToSegmentMeters(LatLngPoint a, LatLngPoint b, LatLngPoint p) {
+        double[] nA = toNVector(a);
+        double[] nB = toNVector(b);
+        double[] nP = toNVector(p);
+
+        double[] pathNormal = cross(nA, nB);
+        double normLen = Math.sqrt(dot(pathNormal, pathNormal));
+        
+        if (normLen < 1e-10) {
+            return distanceMeters(a, p); // A and B are the same point
+        }
+
+        // Normalize the path normal
+        pathNormal[0] /= normLen;
+        pathNormal[1] /= normLen;
+        pathNormal[2] /= normLen;
+
+        // Angle to path is asin of (nP . pathNormal)
+        double angleToPath = Math.asin(Math.max(-1.0, Math.min(1.0, dot(nP, pathNormal))));
+        double crossTrackDist = Math.abs(angleToPath) * EARTH_RADIUS_M;
+
+        // Check if the closest point is actually within the segment AB
+        // We use dot products to check if P is between the planes defined by nA and nB
+        double[] planeA = cross(pathNormal, nA);
+        double[] planeB = cross(pathNormal, nB);
+
+        if (dot(nP, planeA) >= 0 && dot(nP, planeB) <= 0) {
+            return crossTrackDist;
+        } else {
+            // Closest point is one of the endpoints
+            return Math.min(distanceMeters(a, p), distanceMeters(b, p));
+        }
     }
 }

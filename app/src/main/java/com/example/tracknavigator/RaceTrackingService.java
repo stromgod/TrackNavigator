@@ -39,6 +39,7 @@ import java.util.List;
 /**
  * Foreground service for tracking race progress.
  * Starts GPS search early and keeps it running seamlessly.
+ * Now uses Kalman Filter for coordinate smoothing.
  */
 public class RaceTrackingService extends Service {
 
@@ -93,12 +94,16 @@ public class RaceTrackingService extends Service {
     private final IBinder binder = new LocalBinder();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private FusedLocationProviderClient fusedClient;
+    private KalmanFilter kalmanFilter;
+
     private final LocationCallback locationCallback = new LocationCallback() {
         @Override
         public void onLocationResult(@NonNull LocationResult locationResult) {
             for (Location location : locationResult.getLocations()) {
-                lastFix = location;
-                if (uiListener != null) uiListener.onLocationUpdate(location);
+                // Apply Kalman Filtering to smooth out GPS noise
+                Location smoothed = kalmanFilter.process(location);
+                lastFix = smoothed;
+                if (uiListener != null) uiListener.onLocationUpdate(smoothed);
             }
         }
     };
@@ -140,6 +145,7 @@ public class RaceTrackingService extends Service {
     public void onCreate() {
         super.onCreate();
         fusedClient = LocationServices.getFusedLocationProviderClient(this);
+        kalmanFilter = new KalmanFilter(3f); // 3m min accuracy threshold
         ensureChannel();
         sRunning = true;
     }
@@ -230,6 +236,7 @@ public class RaceTrackingService extends Service {
         mainHandler.removeCallbacks(tickRunnable);
         lastUiState = null;
         hasPlayedMiddleSound = false;
+        kalmanFilter.reset(); // Clear filter state for new race
         initSoundPool();
         track = points;
         segmentStartIndex = 0;
@@ -261,13 +268,13 @@ public class RaceTrackingService extends Service {
     private void maybePlayMilestoneSounds(@NonNull RaceUiState ui, boolean raceFinished) {
         if (!soundLoaded || soundPool == null) return;
 
-        // Финиш
+        // Finish sound
         if (raceFinished && finishSoundId != 0) {
             soundPool.play(finishSoundId, 1.0f, 1.0f, 1, 0, 1.0f);
             return;
         }
 
-        // Половина дистанции
+        // Halfway sound
         if (!hasPlayedMiddleSound && ui.routeStage == RaceUiState.STAGE_MIDDLE && middleSoundId != 0) {
             soundPool.play(middleSoundId, 1.0f, 1.0f, 1, 0, 1.0f);
             hasPlayedMiddleSound = true;
