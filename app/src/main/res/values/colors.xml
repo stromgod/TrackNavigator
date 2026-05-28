@@ -1,22 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Main Theme Colors -->
-    <color name="md_theme_background">#E3EDF7</color> <!-- Deep Green -->
-    <color name="md_theme_surface">#3A7CA5</color>    <!-- Slightly Lighter Green for Cards -->
-    <color name="md_theme_primary">#3A7CA5</color>    <!-- White for text/icons on green -->
-    <color name="md_theme_onPrimary">#617386</color>  <!-- Dark Green text on White buttons -->
-    <color name="md_theme_primary_dark">#0D330D</color>
-    <color name="md_theme_secondary">#E8F5E9</color>  <!-- Light Green for secondary elements -->
-    <color name="md_theme_accent">#A5D6A7</color>     <!-- Missing accent color added -->
+    <!-- Main Theme Colors (blue palette) -->
+    <color name="md_theme_background">#E3EDF7</color>
+    <color name="md_theme_surface">#3A7CA5</color>
+    <color name="md_theme_primary">#3A7CA5</color>
+    <color name="md_theme_onPrimary">#617386</color>
+    <color name="md_theme_primary_dark">#1E5A86</color>
+    <color name="md_theme_secondary">#D8ECFF</color>
+    <color name="md_theme_accent">#8DC5F2</color>
 
     <color name="card_stroke">#30FFFFFF</color>
     <color name="warning_bg">#C98F65</color>
     <color name="warning_text">#FFFFFF</color>
-    <color name="success_bg">#4CAF50</color>
+    <color name="success_bg">#4A9FE0</color>
 
     <color name="progress_track_bg">#40FFFFFF</color>
     <color name="progress_marker">#BDBDBD</color>
     <color name="progress_marker_active">#FFFFFF</color>
+    <color name="race_deviation_on_track">#7BA98B</color>
+    <color name="race_deviation_off_track">#E57373</color>
+    <color name="race_start_far">#FFCCBC</color>
 
     <!-- Gradients -->
     <color name="gradient_start">#CDDEF0</color>

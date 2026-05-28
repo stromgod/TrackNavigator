@@ -113,9 +113,9 @@ MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\ad
 	android:label
 		ADDED from C:\Users\admin\StudioProjects\TrackNavigator\app\src\main\AndroidManifest.xml:13:9-41
 	android:roundIcon
-		ADDED from C:\Users\admin\StudioProjects\TrackNavigator\app\src\main\AndroidManifest.xml:14:9-51
+		ADDED from C:\Users\admin\StudioProjects\TrackNavigator\app\src\main\AndroidManifest.xml:14:9-52
 	android:icon
-		ADDED from C:\Users\admin\StudioProjects\TrackNavigator\app\src\main\AndroidManifest.xml:12:9-46
+		ADDED from C:\Users\admin\StudioProjects\TrackNavigator\app\src\main\AndroidManifest.xml:12:9-47
 	android:allowBackup
 		ADDED from C:\Users\admin\StudioProjects\TrackNavigator\app\src\main\AndroidManifest.xml:11:9-35
 	android:theme

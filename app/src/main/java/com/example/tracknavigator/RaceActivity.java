@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Location;
 import android.location.LocationManager;
@@ -129,8 +128,11 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
     private ImageView imgGpsCheckSetup;
     private MaterialButton btnPickGpx, btnStartRace;
 
-    private final int colorMarkerDefault = Color.parseColor("#B0BEC5"); 
-    private final int colorMarkerActive = Color.WHITE;
+    private int colorMarkerDefault;
+    private int colorMarkerActive;
+    private int colorStartFar;
+    private int colorDirectionGood;
+    private int colorDirectionBad;
 
     private final ActivityResultLauncher<Intent> openGpxLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -145,6 +147,12 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_race);
+
+        colorMarkerDefault = ContextCompat.getColor(this, R.color.progress_marker);
+        colorMarkerActive = ContextCompat.getColor(this, R.color.progress_marker_active);
+        colorStartFar = ContextCompat.getColor(this, R.color.race_start_far);
+        colorDirectionGood = ContextCompat.getColor(this, R.color.race_deviation_on_track);
+        colorDirectionBad = ContextCompat.getColor(this, R.color.race_deviation_off_track);
 
         // Optional: preloaded track points from RecordTrackActivity.
         Object extra = getIntent().getSerializableExtra(EXTRA_TRACK_POINTS);
@@ -253,7 +261,7 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
         if (textDistToStart != null) {
             textDistToStart.setVisibility(View.VISIBLE);
             textDistToStart.setText(getString(R.string.dist_to_start, dist));
-            textDistToStart.setTextColor(dist <= START_THRESHOLD_M ? Color.WHITE : Color.parseColor("#FFCCBC"));
+            textDistToStart.setTextColor(dist <= START_THRESHOLD_M ? colorMarkerActive : colorStartFar);
         }
         checkStartEligibility();
     }
@@ -364,9 +372,9 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
         
         if (state.deviationBgKind == RaceEvaluator.BG_NONE || state.deviationBgKind == RaceEvaluator.BG_SUCCESS) {
             imgDirectionArrow.setRotation(0);
-            imgDirectionArrow.setColorFilter(Color.GREEN);
+            imgDirectionArrow.setColorFilter(colorDirectionGood);
         } else {
-            imgDirectionArrow.setColorFilter(Color.RED);
+            imgDirectionArrow.setColorFilter(colorDirectionBad);
             if (state.crossTrackSign > 0) {
                 imgDirectionArrow.setRotation(-90);
             } else if (state.crossTrackSign < 0) {

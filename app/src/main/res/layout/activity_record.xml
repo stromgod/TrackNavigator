@@ -52,7 +52,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
                         android:layout_weight="1"
-                        android:textColor="#FFFFFF"
+                        android:textColor="?attr/colorOnSurface"
                         android:textAppearance="?attr/textAppearanceBody1"
                         android:textStyle="bold"
                         android:text="Botik message" />
@@ -86,7 +86,7 @@
                             android:layout_height="32dp"
                             android:layout_gravity="center"
                             android:indeterminate="true"
-                            android:indeterminateTint="#FFFFFF"
+                            android:indeterminateTint="?attr/colorOnSurface"
                             android:visibility="visible" />
 
                         <ImageView
@@ -95,7 +95,7 @@
                             android:layout_height="40dp"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_check_green"
-                            app:tint="#FFFFFF"
+                            app:tint="?attr/colorOnSurface"
                             android:visibility="gone" />
                     </FrameLayout>
 
@@ -107,7 +107,7 @@
                         android:layout_height="wrap_content"
                         android:paddingBottom="16dp"
                         android:gravity="center"
-                        android:textColor="#FFFFFF"
+                        android:textColor="?attr/colorOnSurface"
                         android:textAppearance="?attr/textAppearanceBody1"
                         android:textStyle="bold"
                         tools:text="Высокая точность" />
@@ -115,7 +115,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="2dp"
-                        android:background="#40FFFFFF"
+                        android:background="@color/progress_track_bg"
                         android:layout_marginBottom="16dp" />
 
                     <TextView
@@ -125,7 +125,7 @@
                         android:textAppearance="?attr/textAppearanceHeadline6"
                         android:textStyle="bold"
                         android:gravity="center"
-                        android:textColor="#FFFFFF"
+                        android:textColor="?attr/colorOnSurface"
                         tools:text="Точек: 12" />
 
                     <TextView
@@ -134,7 +134,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="?attr/textAppearanceSubtitle2"
-                        android:textColor="#E0E0E0"
+                        android:textColor="?android:attr/textColorSecondary"
                         android:gravity="center"
                         android:alpha="0.8"
                         tools:text="Дистанция: 1.45 км" />
@@ -162,12 +162,10 @@
             android:textColor="@color/md_theme_onPrimary"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:backgroundTint="#FFFFFF"
+            app:backgroundTint="?attr/colorSecondary"
             app:icon="@drawable/ic_btn_add_pin"
             app:iconTint="@color/md_theme_onPrimary"
-            app:iconSize="28dp"
-            android:elevation="12dp"
-            android:translationZ="6dp" />
+            app:iconSize="28dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnFinish"
@@ -179,12 +177,10 @@
             android:textColor="@color/md_theme_onPrimary"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:backgroundTint="#FFFFFF"
+            app:backgroundTint="?attr/colorSecondary"
             app:icon="@drawable/ic_btn_save_gpx"
             app:iconTint="@color/md_theme_onPrimary"
-            app:iconSize="28dp"
-            android:elevation="12dp"
-            android:translationZ="6dp" />
+            app:iconSize="28dp" />
     </LinearLayout>
 
     <!-- Top-right Exit/Cancel Button -->
@@ -202,7 +198,7 @@
         android:insetRight="0dp"
         android:insetBottom="0dp"
         app:icon="@drawable/ic_btn_exit"
-        app:iconTint="#FFFFFF"
+        app:iconTint="?attr/colorOnSurface"
         app:iconSize="32dp"
         app:iconPadding="0dp" />
 

@@ -52,7 +52,7 @@
     <string name="bot_name_dialog_hint">Your name</string>
     <string name="bot_intro_message">I\'m Botik from TrackNavigator. Let\'s get started - what\'s your name?</string>
     <string name="bot_guide_press_record">Great, %1$s! Tap &quot;Record&quot; and turn on GPS.</string>
-    <string name="bot_guide_record_in_record">Start from the starting line, then add control points: press &quot;Point&quot; roughly every 10-15 seconds.</string>
+    <string name="bot_guide_record_in_record">Start from the starting line, then add control points: press &quot;Point&quot; roughly every 5 seconds.</string>
     <string name="bot_guide_gps_disabled">Please enable GPS. Otherwise the control points won’t be accurate.</string>
     <string name="bot_guide_after_save">Track saved. Taking you to the race module…</string>
     <string name="bot_guide_pick_track_file">Choose a GPX track file to start the race.</string>

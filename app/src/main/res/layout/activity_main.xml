@@ -19,7 +19,7 @@
         android:insetRight="0dp"
         android:insetBottom="0dp"
         app:icon="@drawable/ic_btn_exit"
-        app:iconTint="#FFFFFF"
+        app:iconTint="?attr/colorOnSurface"
         app:iconSize="32dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -68,7 +68,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_weight="1"
-                android:textColor="#FFFFFF"
+                android:textColor="?attr/colorOnSurface"
                 android:textAppearance="?attr/textAppearanceBody1"
                 android:textStyle="bold"
                 android:text="Botik message" />
@@ -93,13 +93,10 @@
             android:textColor="@color/md_theme_onPrimary"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:backgroundTint="#FFFFFF"
+            app:backgroundTint="?attr/colorSecondary"
             app:icon="@drawable/ic_btn_map_record"
             app:iconTint="@color/md_theme_onPrimary"
-            app:iconSize="28dp"
-            app:elevation="14dp"
-            android:translationZ="10dp"
-            android:stateListAnimator="@null" />
+            app:iconSize="28dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnRace"
@@ -111,13 +108,10 @@
             android:textColor="@color/md_theme_onPrimary"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:backgroundTint="#FFFFFF"
+            app:backgroundTint="?attr/colorSecondary"
             app:icon="@drawable/ic_btn_flag_race"
             app:iconTint="@color/md_theme_onPrimary"
-            app:iconSize="28dp"
-            app:elevation="14dp"
-            android:translationZ="10dp"
-            android:stateListAnimator="@null" />
+            app:iconSize="28dp" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
