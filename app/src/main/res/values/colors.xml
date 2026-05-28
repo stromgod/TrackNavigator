@@ -19,6 +19,6 @@
     <color name="progress_marker_active">#FFFFFF</color>
 
     <!-- Gradients -->
-    <color name="gradient_start">#2E7D32</color>
-    <color name="gradient_end">#1B5E20</color>
+    <color name="gradient_start">#CDDEF0</color>
+    <color name="gradient_end">#E3EDF7</color>
 </resources>
