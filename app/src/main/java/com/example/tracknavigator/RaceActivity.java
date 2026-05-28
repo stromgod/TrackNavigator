@@ -57,6 +57,8 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
     private static final int REQ_PERM_LOCATION = 2001;
     private static final long GPS_MIN_INTERVAL_MS = 500L;
     private static final double START_THRESHOLD_M = 5.0;
+    private static final long BOT_STATE_MIN_DISPLAY_MS = 3500L;
+    private static final long BOT_FINISH_READ_MS = 4500L;
 
     private List<LatLngPoint> track;
     private RaceTrackingService boundService;
@@ -69,10 +71,14 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
     private MaterialCardView layoutBotRace;
     private ImageView imgBotRace;
     private TextView textBotRace;
+    private MaterialCardView layoutBotRaceSetup;
+    private ImageView imgBotRaceSetup;
+    private TextView textBotRaceSetup;
 
     private boolean trackPreloaded = false;
     private long raceStartMs = 0;
     private int lastBotMode = -1; // 0 = happy, 1 = bad
+    private long lastBotModeChangeAtMs = 0L;
     private final Handler uiHandler = new Handler(Looper.getMainLooper());
 
     private FusedLocationProviderClient fusedClient;
@@ -159,6 +165,9 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
         layoutBotRace = findViewById(R.id.layoutBotRace);
         imgBotRace = findViewById(R.id.imgBotRace);
         textBotRace = findViewById(R.id.textBotRace);
+        layoutBotRaceSetup = findViewById(R.id.layoutBotRaceSetup);
+        imgBotRaceSetup = findViewById(R.id.imgBotRaceSetup);
+        textBotRaceSetup = findViewById(R.id.textBotRaceSetup);
 
         textDistToStart = findViewById(R.id.textDistToStart);
         progressGpsSetup = findViewById(R.id.progressGpsSetup);
@@ -339,7 +348,7 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
 
         if (state.raceFinished) {
             Toast.makeText(this, R.string.race_finished, Toast.LENGTH_LONG).show();
-            stopRaceUser(2000);
+            stopRaceUser(BOT_FINISH_READ_MS);
         }
     }
 
@@ -395,19 +404,24 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
     }
 
     private void refreshBotUiForSetup() {
-        if (layoutBotRace == null || imgBotRace == null || textBotRace == null) return;
+        if (layoutBotRaceSetup == null || imgBotRaceSetup == null || textBotRaceSetup == null) return;
         if (BotPrefs.isOnboardingDone(this)) {
-            layoutBotRace.setVisibility(View.GONE);
+            layoutBotRaceSetup.setVisibility(View.GONE);
             return;
         }
 
-        BotAssets.setBotIcon(this, imgBotRace, "Greetings.png");
-        textBotRace.setText(getString(R.string.bot_guide_race_setup));
-        layoutBotRace.setVisibility(View.VISIBLE);
+        BotAssets.setBotIcon(this, imgBotRaceSetup, "Greetings.png");
+        if (track == null || track.size() < 2) {
+            textBotRaceSetup.setText(getString(R.string.bot_guide_pick_track_file));
+        } else {
+            textBotRaceSetup.setText(getString(R.string.bot_guide_race_setup));
+        }
+        layoutBotRaceSetup.setVisibility(View.VISIBLE);
     }
 
     private void refreshBotForRaceState(@NonNull RaceUiState state) {
         if (layoutBotRace == null || imgBotRace == null || textBotRace == null) return;
+        if (layoutBotRaceSetup != null) layoutBotRaceSetup.setVisibility(View.GONE);
         if (BotPrefs.isOnboardingDone(this)) {
             layoutBotRace.setVisibility(View.GONE);
             return;
@@ -430,16 +444,26 @@ public class RaceActivity extends AppCompatActivity implements RaceTrackingServi
         }
 
         boolean offTrack = state.deviationBgKind == RaceEvaluator.BG_WARNING;
+        int newMode = offTrack ? 1 : 0;
+        long now = System.currentTimeMillis();
+
+        if (lastBotMode != -1 && newMode != lastBotMode && (now - lastBotModeChangeAtMs) < BOT_STATE_MIN_DISPLAY_MS) {
+            // Keep previous phrase for readability if route state flips too quickly.
+            return;
+        }
+
         if (offTrack) {
             if (lastBotMode != 1) {
                 BotAssets.setBotIcon(this, imgBotRace, "Bad.png");
                 lastBotMode = 1;
+                lastBotModeChangeAtMs = now;
             }
             textBotRace.setText(getString(R.string.bot_bad_off_track));
         } else {
             if (lastBotMode != 0) {
                 BotAssets.setBotIcon(this, imgBotRace, "Happy.png");
                 lastBotMode = 0;
+                lastBotModeChangeAtMs = now;
             }
             textBotRace.setText(getString(R.string.bot_happy_on_track));
         }

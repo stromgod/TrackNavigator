@@ -55,6 +55,7 @@
     <string name="bot_guide_record_in_record">Start from the starting line, then add control points: press &quot;Point&quot; roughly every 10-15 seconds.</string>
     <string name="bot_guide_gps_disabled">Please enable GPS. Otherwise the control points won’t be accurate.</string>
     <string name="bot_guide_after_save">Track saved. Taking you to the race module…</string>
+    <string name="bot_guide_pick_track_file">Choose a GPX track file to start the race.</string>
     <string name="bot_guide_race_setup">Now go to the start. When you\'re close, tap &quot;Start&quot;.</string>
     <string name="bot_happy_on_track">You\'re on track!</string>
     <string name="bot_bad_off_track">You turned off route. Realign to the line.</string>

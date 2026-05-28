@@ -67,6 +67,7 @@
     <string name="bot_guide_record_in_record">Поставь первую точку на старте, затем добавляй контрольные точки: нажимай «Точка» примерно каждые 10–15 секунд.</string>
     <string name="bot_guide_gps_disabled">Пожалуйста, включи GPS. Иначе контрольные точки будут неточными.</string>
     <string name="bot_guide_after_save">Трек сохранён. Веду тебя в модуль забега…</string>
+    <string name="bot_guide_pick_track_file">Выбери файл трека GPX, чтобы начать забег.</string>
     <string name="bot_guide_race_setup">Идём на старт. Когда окажешься рядом — нажми «Старт».</string>
     <string name="bot_happy_on_track">Ты на курсе!</string>
     <string name="bot_bad_off_track">Ты свернул. Выравнивайся по маршруту.</string>

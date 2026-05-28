@@ -9,6 +9,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.view.View;
@@ -51,6 +52,8 @@ public class RecordTrackActivity extends AppCompatActivity {
     private static final long GPS_MIN_INTERVAL_MS = 500L;
     private static final long FIX_BUFFER_MAX_AGE_MS = 10_000L;
     private static final int FIX_BUFFER_MAX_SIZE = 32;
+    private static final long BOT_MESSAGE_MIN_INTERVAL_MS = 2500L;
+    private static final long BOT_READ_BEFORE_NAV_MS = 3000L;
 
     private FusedLocationProviderClient fusedLocationClient;
     private final ArrayDeque<Location> recentFixes = new ArrayDeque<>();
@@ -80,6 +83,9 @@ public class RecordTrackActivity extends AppCompatActivity {
     private MaterialCardView layoutBotRecord;
     private ImageView imgBotRecord;
     private TextView textBotRecord;
+    private final Handler uiHandler = new Handler(Looper.getMainLooper());
+    private int lastBotMessageResId = -1;
+    private long lastBotMessageAtMs = 0L;
 
     private final ActivityResultLauncher<String> createDocumentLauncher = registerForActivityResult(
             new ActivityResultContracts.CreateDocument("application/gpx+xml"),
@@ -287,13 +293,16 @@ public class RecordTrackActivity extends AppCompatActivity {
 
                 if (!BotPrefs.isOnboardingDone(this)) {
                     BotPrefs.setStep(this, BotPrefs.Step.GUIDE_RACE);
+                    showBotMessage(R.string.bot_guide_after_save);
                 }
 
                 // Lead user to race module with preloaded control points.
                 Intent goToRace = new Intent(this, RaceActivity.class);
                 goToRace.putExtra(RaceActivity.EXTRA_TRACK_POINTS, new ArrayList<>(controlPoints));
-                startActivity(goToRace);
-                finish();
+                uiHandler.postDelayed(() -> {
+                    startActivity(goToRace);
+                    finish();
+                }, BotPrefs.isOnboardingDone(this) ? 0L : BOT_READ_BEFORE_NAV_MS);
             }
         } catch (IOException e) {
             Toast.makeText(this, getString(R.string.save_failed_with_reason, e.getMessage()), Toast.LENGTH_LONG).show();
@@ -320,9 +329,15 @@ public class RecordTrackActivity extends AppCompatActivity {
     private void showBotMessage(int stringResId) {
         if (layoutBotRecord == null || imgBotRecord == null || textBotRecord == null) return;
         if (BotPrefs.isOnboardingDone(this)) return;
+        long now = System.currentTimeMillis();
+        if (lastBotMessageResId != stringResId && (now - lastBotMessageAtMs) < BOT_MESSAGE_MIN_INTERVAL_MS) {
+            return;
+        }
         BotAssets.setBotIcon(this, imgBotRecord, "Greetings.png");
         textBotRecord.setText(getString(stringResId));
         layoutBotRecord.setVisibility(View.VISIBLE);
+        lastBotMessageResId = stringResId;
+        lastBotMessageAtMs = now;
     }
 
     @Override
