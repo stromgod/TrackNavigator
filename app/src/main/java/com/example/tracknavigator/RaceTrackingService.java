@@ -52,9 +52,9 @@ public class RaceTrackingService extends Service {
     private static final String TAG = "RaceTrackingService";
     private static final int NOTIF_ID = 7421;
     private static final String CHANNEL_ID = "race_location";
-    private static final long TICK_MS = 2000L;
+    private static final long TICK_MS = 1000L;
     private static final long GPS_MIN_INTERVAL_MS = 500L;
-    private static final long DEVIATION_SOUND_REPEAT_MS = 5000L;
+    private static final long DEVIATION_SOUND_REPEAT_MS = 3000L;
 
     private static volatile boolean sRunning;
     private static volatile boolean sRaceActive;
